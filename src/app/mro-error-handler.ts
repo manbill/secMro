@@ -1,7 +1,8 @@
 import { IonicErrorHandler, LoadingController } from "ionic-angular";
+import { Inject } from "@angular/core";
 import { inspect } from "util";
 export class MroErrorHandler extends IonicErrorHandler {
-  constructor(private loading: LoadingController) { super() }
+  constructor(@Inject(LoadingController)private loading: LoadingController) { super() }
   handleError(error: any) {
     if (this.isMroError(error)) {
       switch (error.errorCode) {
