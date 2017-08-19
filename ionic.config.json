@@ -1,5 +1,6 @@
 {
   "name": "secMroAppV2",
-  "app_id": "",
-  "type": "ionic-angular"
+  "app_id": "com.sec.mroapp",
+  "type": "ionic-angular",
+  "integrations": {}
 }
