@@ -8,21 +8,28 @@ import { AboutPage } from '../pages/about/about';
 import { ContactPage } from '../pages/contact/contact';
 import { HomePage } from '../pages/home/home';
 import { TabsPage } from '../pages/tabs/tabs';
-
+import { LoginPage } from "../pages/login/login";
+import {Http,HttpModule} from '@angular/http';
 import { StatusBar } from '@ionic-native/status-bar';
+import { SQLite } from "@ionic-native/sqlite";
 import { SplashScreen } from '@ionic-native/splash-screen';
-
+import { ReactiveFormsModule } from "@angular/forms";
+import { DbOperationProvider } from '../providers/db-operation/db-operation';
+import { apiProviders } from '../providers/api/api';
 @NgModule({
   declarations: [
     MyApp,
     AboutPage,
     ContactPage,
     HomePage,
-    TabsPage
+    TabsPage,
+    LoginPage
   ],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(MyApp)
+    HttpModule,
+    ReactiveFormsModule,
+    IonicModule.forRoot(MyApp),
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -30,12 +37,16 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     AboutPage,
     ContactPage,
     HomePage,
-    TabsPage
+    TabsPage,
+    LoginPage
   ],
   providers: [
     StatusBar,
+    SQLite,
     SplashScreen,
-    {provide: ErrorHandler, useClass: MroErrorHandler}
+    {provide: ErrorHandler, useClass: MroErrorHandler},
+    DbOperationProvider,
+    ...apiProviders
   ]
 })
 export class AppModule {}
