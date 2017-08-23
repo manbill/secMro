@@ -1,9 +1,14 @@
-import { Component,Inject } from '@angular/core';
-import { Http } from "@angular/http";
-import { API_LOGIN} from "../../providers/api/api";
+import { Component, Inject } from '@angular/core';
+import { Http,RequestOptionsArgs,RequestOptions,Headers } from "@angular/http";
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { FormGroup, AbstractControl, FormBuilder, Validators } from "@angular/forms";
 import { ajax } from 'rxjs/observable/dom/ajax';
+import 'rxjs/add/operator/switchMap';
+import 'rxjs/add/operator/do';
+import { Observable } from 'rxjs/Observable';
+import * as Apis from "../../providers/api/api";
+import { Api_login } from '../../providers/api/api';
+
 
 
 
@@ -23,7 +28,6 @@ export class LoginPage {
   constructor(public navCtrl: NavController,
     private fb: FormBuilder,
     private http: Http,
-    @Inject(API_LOGIN)private loginApi:string,
     public navParams: NavParams) {
     this.createForm();
   }
@@ -34,27 +38,39 @@ export class LoginPage {
     });
   }
   login() {
-    console.log(this.loginApi,{
-      username: this.loginForm.get('userName').value,
+    console.log(Apis.Api_login, {
+      userName: this.loginForm.get('userName').value,
       password: this.loginForm.get('password').value,
-      flag: 2
+      deviceFlag: 2
     });
     // ajax.post(this.loginApi,{username:'10780326',password:'123456',flag:2})
     // .subscribe(res=>console.log,e=>console.error,()=>console.log("doneeeee"));
-   this.http.post(this.loginApi, {
-      username: this.loginForm.get('userName').value,
+    this.http.post(Apis.Api_login, {
+      userName: this.loginForm.get('userName').value,
       password: this.loginForm.get('password').value,
-      flag: 2
+      deviceFlag: 2
     })
+      .do(res => console.debug(res.json().data))
+      .switchMap(
+      (res) => {
+        const params = new Headers();
+        const reqArg = new RequestOptions();
+        reqArg.headers=params;
+        reqArg.headers.append("tokenId",res.json()['data']['token']);
+        console.debug("token",reqArg);
+        return this.http.post(Apis.Api_getUserProject,{},reqArg)
+      }
+      )
+      .do(res => console.debug)
       .subscribe(
       res => {
-        console.debug(res);
+        console.debug(res.json());
       },
       e => {
         console.error(e);
       },
-      ()=>console.log("done")
-    );
+      () => console.log("done")
+      );
   }
   ionViewDidLoad() {
     console.log('ionViewDidLoad LoginPage');

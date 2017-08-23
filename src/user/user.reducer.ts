@@ -1,6 +1,11 @@
 import { User } from "./user.modal";
 import { Action } from "redux";
 import * as UserActions from "./user.actions";
+import 'rxjs/add/operator/mapTo';
+import 'rxjs/add/operator/switchMap';
+import { Observable } from 'rxjs/Observable';
+import { ActionsObservable } from "redux-observable";
+
 export interface UserState {
   currentUser: User;
   isTokenValid:boolean;
@@ -32,3 +37,6 @@ export const UserReducer = function (state: UserState, action: Action): UserStat
     }
   }
 }
+export const setCurUserEpic=(actions$:ActionsObservable<Action>,store):Observable<Action>=>actions$
+.ofType(UserActions.SET_CURRENT_USER)
+.switchMap()

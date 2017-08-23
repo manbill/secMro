@@ -7,9 +7,9 @@ export interface SetCurrentUserAction extends Action {
   user: User
 }
 export interface FetchUserAction extends Action {
-  username:string,
+  userName:string,
   password:string,
-  flag:number
+  deviceFlag:number
 }
 export interface IsTokenValid extends Action {
   isValid:boolean
@@ -22,9 +22,9 @@ export const isTokenVali:ActionCreator<IsTokenValid> = (isValid:boolean) => ({
   type: IS_TOKEN_VALID,
   isValid: isValid
 });
-export const fetchUser:ActionCreator<FetchUserAction>=({password,userName,flag=2})=>({
+export const fetchUser:ActionCreator<FetchUserAction>=({password,userName,deviceFlag=2})=>({
   type:LOGIN_USER,
-  username:userName,
+  userName:userName,
   password:password,
-  flag:flag
+  deviceFlag:deviceFlag
 })
