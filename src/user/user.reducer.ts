@@ -37,7 +37,3 @@ export const UserReducer = function (state: UserState, action: Action): UserStat
     }
   }
 }
-export const setCurUserEpic=(actions$:ActionsObservable<Action>,store):Observable<Action>=>actions$
-.ofType(UserActions.SET_CURRENT_USER)
-.switchMap()
-.mapTo()
