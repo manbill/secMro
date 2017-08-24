@@ -7,7 +7,7 @@ export const tableNames={
   eam_user:'eam_user',
   eam_sync_function:'eam_sync_function',
   eam_sync_file:'eam_sync_file',
-  eam_sync_orders:'eam_sync_orders',
+  eam_sync_work_order:'eam_sync_work_order',
   eam_sync_dictionary_detail:'eam_sync_dictionary_detail'
 }
 
@@ -45,6 +45,45 @@ export const SqlVersions: SqlVersion[] = [
         lastUpdBy int,
         lastUpdOn text,
         PRIMARY KEY(detailId)
+      )`
+    ]
+  },
+  {
+    sqlVersion:3,
+    sqlStatements:[
+      `create table if not exists ${tableNames.eam_sync_work_order}(
+        activeFlag text,
+        areaType text,
+        areaTypeName text,
+        assignPerson text,
+        faultBegindate int,
+        faultCode text,
+        faultName text,
+        lastUpdateDatetimeApi int,
+        createOn int,
+        planBegindate int,
+        planEnddate int,
+        planNoticeId int,
+        positionCode text,
+        positionId  int,
+        projectId int,
+        projectName text,
+        siteManager text,
+        taskAccepted text,
+        transNoticeNo text,
+        workTypeId int,
+        workTypeName text,
+        workorderCode text,
+        workorderId int not null,
+        workorderStatus int,
+        workorderStatusName text,
+        uploadStatus int,
+        downloadStatus int,
+        workorderTitle text,
+        workorderType int,
+        workorderTypeName text,
+        json text,
+        PRIMARY KEY(workorderId)
       )`
     ]
   }

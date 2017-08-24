@@ -136,23 +136,25 @@ export class DbOperationProvider {
           return this.executeSql(`select * from ${tableNames.eam_sql_version}`)
             .map(res => {
               let lastSqlVer = res.rows.item(0)['sqlVersion'];
-              console.debug("上一版sqlVersion:", lastSqlVer);
+              console.debug("上一版sqlVersion:", lastSqlVer,`当前版本：${lastestSqlVersion}`);
               sqls = SqlVersions
                 .filter(sqlVer => sqlVer.sqlVersion > +lastSqlVer)
                 .reduce((sqls, sqlVer) => sqls.concat(sqlVer.sqlStatements
                   .filter(sql => sql && sql !== '')
                 ), []);
+                if(lastSqlVer!==+lastestSqlVersion){
+                  sqls.push([updateSqlver,[lastestSqlVersion]]);
+                }
               return sqls;
             })
-            .switchMap((sqls) => this.sqlBatch(sqls)
-              .switchMap(() => this.executeSql(updateSqlver, [lastestSqlVersion])));
+            .switchMap((sqls) => this.sqlBatch(sqls));
         } else {
           sqls = SqlVersions
             .reduce((sqls, sqlVer) => sqls.concat(sqlVer.sqlStatements
               .filter(sql => sql && sql !== '')
             ), []);
+            sqls.push([inserSqlver,[lastestSqlVersion]]);
           return this.sqlBatch(sqls)
-            .switchMap(() => this.executeSql(inserSqlver, [lastestSqlVersion]));
         }
       });
 

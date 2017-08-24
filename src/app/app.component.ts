@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
+import 'rxjs/add/operator/timestamp';
 
 import { TabsPage } from '../pages/tabs/tabs';
 import { LoginPage } from "../pages/login/login";
@@ -19,12 +20,13 @@ export class MyApp {
       // Here you can do any higher level native things you might need.
       statusBar.styleDefault();
       splashScreen.hide();
+      let startTime = Date.now();
       this.dbOp
         .initSqlVersions()
         .subscribe(
         res => console.log(res),
         e => console.error(e),
-        () => console.log("初始化数据库版本完成")
+        () => console.log("初始化数据库版本完成",Date.now()-startTime,'毫秒')
         )
     }
     )
