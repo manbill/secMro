@@ -11,17 +11,22 @@ import { LoginPage } from "../pages/login/login";
   templateUrl: 'app.html'
 })
 export class MyApp {
-  rootPage:any=LoginPage ;
+  rootPage: any = LoginPage;
 
-  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,private dbOp:DbOperationProvider) {
+  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, private dbOp: DbOperationProvider) {
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       statusBar.styleDefault();
       splashScreen.hide();
-      console.log(dbOp)
-      this.dbOp.executeSql('create table  if not exists eam_sql_version(sqlVersion text)')
-      .subscribe(res=>console.debug(res),e=>console.error(e));
-    });
+      this.dbOp
+        .initSqlVersions()
+        .subscribe(
+        res => console.log(res),
+        e => console.error(e),
+        () => console.log("初始化数据库版本完成")
+        )
+    }
+    )
   }
 }

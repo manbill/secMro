@@ -15,6 +15,7 @@ import { SQLite } from "@ionic-native/sqlite";
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { ReactiveFormsModule } from "@angular/forms";
 import { DbOperationProvider } from '../providers/db-operation/db-operation';
+import { LocalStorageProvider } from '../providers/local-storage/local-storage';
 @NgModule({
   declarations: [
     MyApp,
@@ -45,6 +46,7 @@ import { DbOperationProvider } from '../providers/db-operation/db-operation';
     SplashScreen,
     {provide: ErrorHandler, useClass: MroErrorHandler},
     DbOperationProvider,
+    LocalStorageProvider,
   ]
 })
 export class AppModule {}
