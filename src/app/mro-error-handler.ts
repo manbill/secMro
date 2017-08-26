@@ -1,9 +1,12 @@
+import { Action } from 'redux';
+import { ActionCreator } from 'redux';
 import { IonicErrorHandler, LoadingController } from "ionic-angular";
 import { Inject } from "@angular/core";
 import { inspect } from "util";
 export class MroErrorHandler extends IonicErrorHandler {
   constructor(@Inject(LoadingController)private loading: LoadingController) { super() }
   handleError(error: any) {
+    console.error(error);
     if (this.isMroError(error)) {
       switch (error.errorCode) {
         case MroErrorCode.network_error_code: {
@@ -25,10 +28,16 @@ export class MroErrorHandler extends IonicErrorHandler {
   }
 }
 export class MroError {
+  constructor(errorCode:number,errorMessage:string,errorReason?:any){
+    this.errorCode = errorCode;
+    this.errorMessage = errorMessage;
+    this.errorReason = errorReason;
+  }
   errorCode: number;
   errorMessage: string;
+  errorReason:any;
 }
-enum MroErrorCode {
+export enum MroErrorCode {
   network_error_code = 0x00001,//网络错误
   planned_order_info_upload_error_code,//计划工单信息上传失败
   planned_order_db_insert_failed_error_code,//计划工单信息写入数据库失败
@@ -45,5 +54,16 @@ enum MroErrorCode {
   transfer_order_upload_error_code,//调拨单上传失败
   dictionary_db_insert_error_code,//字典
   dictionary_db_update_error_code,//字典
-
+  user_login_error_code,
+  user_info_db_upsert_error_code,
+  user_info_db_update_error_code,
+  fetch_projects_error_code
 }
+const GENERATE_MRO_ERROR='generate_mro_error';
+export interface GenerateMroErrorAction extends Action{
+  error:MroError
+}
+export const generateMroError:ActionCreator<GenerateMroErrorAction>=(error:MroError)=>({
+  type:GENERATE_MRO_ERROR,
+  error:error
+})

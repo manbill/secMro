@@ -1,5 +1,8 @@
+import { AppState } from './app.reducer';
+import { Store } from 'redux';
+import { AppStore } from './app.store';
 import { DbOperationProvider } from './../providers/db-operation/db-operation';
-import { Component } from '@angular/core';
+import { Component,Inject } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -14,7 +17,7 @@ import { LoginPage } from "../pages/login/login";
 export class MyApp {
   rootPage: any = LoginPage;
 
-  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, private dbOp: DbOperationProvider) {
+  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, private dbOp: DbOperationProvider,@Inject(AppStore)private store:Store<AppState>) {
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.

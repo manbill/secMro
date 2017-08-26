@@ -1,3 +1,4 @@
+import { AppStoreProvider } from './app.store';
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule } from 'ionic-angular';
@@ -47,6 +48,7 @@ import { LocalStorageProvider } from '../providers/local-storage/local-storage';
     {provide: ErrorHandler, useClass: MroErrorHandler},
     DbOperationProvider,
     LocalStorageProvider,
+    AppStoreProvider
   ]
 })
 export class AppModule {}

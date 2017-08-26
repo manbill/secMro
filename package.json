@@ -37,6 +37,7 @@
         "ionicons": "3.0.0",
         "redux": "^3.7.2",
         "redux-observable": "^0.16.0",
+        "reselect": "^3.0.1",
         "rxjs": "5.4.0",
         "sw-toolbox": "3.6.0",
         "util": "^0.10.3",
