@@ -8,7 +8,6 @@ import 'rxjs/add/operator/switchMap';
 import { Platform } from "ionic-angular";
 import { SQLite, SQLiteDatabaseConfig, SQLiteObject } from "@ionic-native/sqlite";
 import 'rxjs/add/observable/fromPromise';
-import 'rxjs/add/observable/empty';
 
 
 
@@ -69,13 +68,15 @@ export class DbOperationProvider {
     if (!sqlStatements) {
       throw new Error("请传入参数 sqlStatements");
     }
-    if (sqlStatements.length === 0) {
-      return Observable.empty();
-    }
     if (!window['cordova']) {//电脑上
       let records = sqlStatements.slice(0);
       const db = window['openDatabase'](dbConfig.name, "", "", 1024 * 1024 * 100, console.log);
       return new Observable(observer => {
+        if(records.length===0){
+          observer.next();
+          observer.complete();
+          return ;
+        }
         db.transaction((tx) => {
           (function insertOne() {
             let record = records.splice(0, 1)[0];

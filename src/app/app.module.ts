@@ -1,3 +1,4 @@
+import { SelectCompanyProjectPage } from './../pages/select-company-project/select-company-project';
 import { AppStoreProvider } from './app.store';
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -24,13 +25,14 @@ import { LocalStorageProvider } from '../providers/local-storage/local-storage';
     ContactPage,
     HomePage,
     TabsPage,
-    LoginPage
+    LoginPage,
+    SelectCompanyProjectPage
   ],
   imports: [
     BrowserModule,
     HttpModule,
     ReactiveFormsModule,
-    IonicModule.forRoot(MyApp),
+    IonicModule.forRoot(MyApp)
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -39,7 +41,8 @@ import { LocalStorageProvider } from '../providers/local-storage/local-storage';
     ContactPage,
     HomePage,
     TabsPage,
-    LoginPage
+    LoginPage,
+    SelectCompanyProjectPage
   ],
   providers: [
     StatusBar,

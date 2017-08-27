@@ -1,0 +1,34 @@
+<!--
+  Generated template for the SelectCompanyProjectPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+  <ion-navbar color='primary'>
+    <ion-title >选择项目</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding>
+  <form novalidate [formGroup]='selectProjectForm'>
+    <ion-item>
+        <ion-label>选择公司</ion-label>
+      <ion-select formControlName='company'
+      okText="确定" cancelText="取消"
+      [compareWith]='companyCompareWith'>
+        <ion-option *ngFor='let company of companies' [value]='company'>{{company.companyName}}</ion-option>
+      </ion-select>
+    </ion-item>
+    <ion-item ng-if='selectProjectForm.get("company").valid'>
+        <ion-label>选择项目</ion-label>
+        <ion-select [compareWith]='projectCompareWith'
+        okText="确定" cancelText="取消"
+        formControlName='project'>
+          <ion-option *ngFor='let project of companyProjects' [value]='project'>{{project.projectName}}</ion-option>
+        </ion-select>
+    </ion-item>
+      <button ion-button block color='primary'
+      (click)='onSelectProject()'
+      [disabled]='selectProjectForm.invalid'>确定</button>
+  </form>
+</ion-content>
