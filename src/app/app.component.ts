@@ -1,10 +1,11 @@
+import { TabsPage } from './../pages/tabs/tabs';
 import { Observable } from 'rxjs/Observable';
 import { inspect } from 'util';
 import { Company } from './../company/company.modal';
 import { UserState } from './../user/user.reducer';
 import { MroUtils } from './../common/mro-util';
 import { tableNames } from './../providers/db-operation/mro.tables';
-import { initAppStore } from './app.actions';
+import { initAppStore, setNavCtrl } from './app.actions';
 import { AppState } from './app.reducer';
 import { Store } from 'redux';
 import { AppStore } from './app.store';
@@ -18,7 +19,6 @@ import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/of';
-import { TabsPage } from '../pages/tabs/tabs';
 import { LoginPage } from "../pages/login/login";
 import { MroErrorCode, MroError } from "./mro-error-handler";
 
@@ -78,6 +78,7 @@ export class MyApp {
                 }, {});
               }
               console.log("缓存的用户状态：", userState);
+              loading.dismiss();
               return userState;
             })
             .catch((e: Error) => {
@@ -95,10 +96,7 @@ export class MyApp {
             this.nav.push(LoginPage);
             return;
           }
-          store.dispatch(initAppStore(this.nav, userState));
-          store.subscribe(() => {
-            console.log("store 正在初始化...");
-          })
+          this.nav.push(TabsPage,{userState:userState});
         },
         e => console.error(e),
         () => console.log("初始化数据库版本完成", Date.now() - startTime, '毫秒')
