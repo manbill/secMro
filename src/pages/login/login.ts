@@ -16,10 +16,9 @@ import 'rxjs/add/operator/delay';
 import { Observable } from 'rxjs/Observable';
 import * as Apis from "../../providers/api/api";
 import { Api_login } from '../../providers/api/api';
-import { userLogin } from "../../user/user.actions";
 import { Subject } from "rxjs/Subject";
+import { login } from "../../user/user.actions";
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { setNavCtrl } from "../../app/app.actions";
 
 
 
@@ -53,13 +52,7 @@ export class LoginPage {
   }
   login() {
     let actionCount = 0;
-    console.log(Apis.Api_login, {
-      userName: this.loginForm.get('userName').value,
-      password: this.loginForm.get('password').value,
-      deviceFlag: 2
-    });
-    this.store.dispatch(setNavCtrl(this.navCtrl));
-    this.store.dispatch(userLogin(
+    this.store.dispatch(login(
       {
         userName: this.loginForm.get('userName').value,
         password: this.loginForm.get('password').value,
@@ -69,7 +62,7 @@ export class LoginPage {
     );
     let count = 0;
     this.unsubscription = this.store.subscribe(() => {
-      console.log(this.store.getState().currentUser.currentUser.realname,++count);
+      console.log(this.store.getState().userState.currentUser.realname,++count);
     });
     this.navCtrl.push(SelectCompanyProjectPage);
   }

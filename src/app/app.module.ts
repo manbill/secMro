@@ -19,6 +19,7 @@ import { ReactiveFormsModule } from "@angular/forms";
 import { DbOperationProvider } from '../providers/db-operation/db-operation';
 import { LocalStorageProvider } from '../providers/local-storage/local-storage';
 import { MroApiProvider } from '../providers/mro-api/mro-api';
+import { HttpInterceptorModule } from "ng-http-interceptor";
 @NgModule({
   declarations: [
     MyApp,
@@ -33,7 +34,8 @@ import { MroApiProvider } from '../providers/mro-api/mro-api';
     BrowserModule,
     HttpModule,
     ReactiveFormsModule,
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp),
+    HttpInterceptorModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [

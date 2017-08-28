@@ -59,7 +59,13 @@ export enum MroErrorCode {
   user_info_db_update_error_code,
   fetch_projects_error_code
 }
-const GENERATE_MRO_ERROR='generate_mro_error';
+export const GENERATE_MRO_ERROR='generate_mro_error';
+export const HANDLED_ERROR="handled_error";
+export function errorHandled():Action{
+  return {
+    type:HANDLED_ERROR
+  }
+}
 export interface GenerateMroErrorAction extends Action{
   error:MroError
 }

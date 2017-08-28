@@ -1,3 +1,5 @@
+import { fetchCompaniesEpic } from './company.epics';
+import { combineEpics } from 'redux-observable';
 import { Company } from './company.modal';
 import { Action } from 'redux';
 import * as CompanyActions from "./company.actions";
@@ -24,6 +26,12 @@ export function CompanyReducer(state:CompanyState=initState,action:Action):Compa
     default:{
       return state;
     }
+    case CompanyActions.SELECT_COMPANY:{
+      return {
+        ...state,
+        selectedCompany:(<CompanyActions.SelectCompanyAction>action).company
+      }
+    }
     case CompanyActions.FETCH_COMPANIES_FULLFILED:{
       const companies =(<CompanyActions.FetchCompaniesAction>action).companies;
       return {
@@ -34,3 +42,4 @@ export function CompanyReducer(state:CompanyState=initState,action:Action):Compa
     }
   }
 }
+export const RootCompanyEpics=fetchCompaniesEpic;

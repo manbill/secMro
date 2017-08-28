@@ -17,14 +17,8 @@ export const SqlVersions: SqlVersion[] = [
     sqlStatements: [
       `create table if not exists ${tableNames.eam_sql_version} (sqlVersion number)`,
       `create table if not exists ${tableNames.eam_user} (
-        userJson text ,
         userStateJson text,
-        selectedCompanyJson text,
-        selectedProjectJson text,
-        lastLoginTime number,
         userId int not null,
-        userProjectsJson text,
-        userCompaniesJson text,
         primary key(userId)
       )`,
       `create table if not exists ${tableNames.eam_sync_function} (

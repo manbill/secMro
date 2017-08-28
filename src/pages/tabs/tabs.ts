@@ -1,6 +1,5 @@
 import { UserState } from './../../user/user.reducer';
 import { NavController, NavParams } from 'ionic-angular';
-import { initAppStore, setNavCtrl } from './../../app/app.actions';
 import { AppStore } from './../../app/app.store';
 import { Store } from 'redux';
 import { AppState } from './../../app/app.reducer';

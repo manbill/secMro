@@ -6,7 +6,6 @@ import { Company } from './../company/company.modal';
 import { UserState } from './../user/user.reducer';
 import { MroUtils } from './../common/mro-util';
 import { tableNames } from './../providers/db-operation/mro.tables';
-import { initAppStore, setNavCtrl } from './app.actions';
 import { AppState } from './app.reducer';
 import { Store } from 'redux';
 import { AppStore } from './app.store';

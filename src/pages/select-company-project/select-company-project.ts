@@ -1,6 +1,6 @@
-import { changCompany } from './../../user/user.actions';
+import { TabsPage } from './../tabs/tabs';
 import { selectProject } from './../../project/project.actions';
-import { selectCompany } from './../../company/company.actions';
+import { selectCompany, SelectCompanyAction } from './../../company/company.actions';
 import { AppState } from './../../app/app.reducer';
 import { Store, Unsubscribe } from 'redux';
 import { AppStore } from './../../app/app.store';
@@ -31,23 +31,24 @@ export class SelectCompanyProjectPage {
   companies: Company[];
   companyProjects: Project[];
   constructor(public navCtrl: NavController, private fb: FormBuilder, @Inject(AppStore) private store: Store<AppState>, public navParams: NavParams) {
-    this.unsubscribeStore = store.subscribe(() => {
+    this.store.subscribe(()=>{
       this.update();
-    });
+    })
     this.createSelectProjectForm();
     this.selectProjectForm.get("company").valueChanges.subscribe((company) => {
       console.log('改变了公司', company);
-      this.store.dispatch(changCompany(company));
+      this.store.dispatch(selectCompany(company));
     });
     this.update();
   }
   getcompanies() {
-    const entities = this.store.getState().currentUser.userCompany.companyEntities;
+    const entities = this.store.getState().userState.companyState.companyEntities;
     return Object.keys(entities)
       .map(id => entities[id]);
   }
   getProjectsOfCompany() {
-    return this.store.getState().currentUser.userProject.projects.filter((project) => this.store.getState().currentUser.userCompany.currentCompany.projectIds.some(id=>id==project.projectId));
+    const projectIds=this.store.getState().userState.projectState.ids.filter((pId) => this.store.getState().userState.companyState.selectedCompany.projectIds.some(cid=>cid==pId));
+    return projectIds.map(pid=>this.store.getState().userState.projectState.projectEntities[pid]);
   }
   update() {
     this.companies = this.getcompanies();
@@ -72,7 +73,7 @@ export class SelectCompanyProjectPage {
     //选择完公司和项目后，跳转到首页，先判断是否是不同的项目，相同项目，直接跳转首页，否则清空业务数据，重新下载业务数据
     this.store.dispatch(selectCompany(this.selectProjectForm.get('company').value));
     this.store.dispatch(selectProject(this.selectProjectForm.get('project').value));
-    // this.navCtrl.push()
+    this.navCtrl.push(TabsPage);
   }
   ionViewDidLoad() {
     console.log('ionViewDidLoad SelectCompanyProjectPage');

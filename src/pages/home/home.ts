@@ -1,4 +1,3 @@
-import { initAppStore } from './../../app/app.actions';
 import { UserState } from './../../user/user.reducer';
 import { Store } from 'redux';
 import { AppState } from '../../app/app.reducer';

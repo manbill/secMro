@@ -1,10 +1,11 @@
+import { RootCompanyEpics } from './../company/company.reducer';
 import { User } from './user.modal';
 import { combineReducers, Action } from 'redux';
 import { ProjectReducer, ProjectState, RootProjectEpics } from '../project/project.reducer';
 import { CompanyReducer, CompanyState } from '../company/company.reducer';
 import * as UserActions from "./user.actions";
 import { combineEpics } from "redux-observable";
-import { loginEpic } from './user.epics';
+import { loginEpic, setUserStateEpic } from './user.epics';
 export interface UserState{
   projectState:ProjectState;
   companyState:CompanyState;
@@ -40,5 +41,5 @@ export const UserRootReducer=combineReducers({
   currentUser:UserReducer,
   lastLoginTime:LastLoginTimeReducer
 });
-export const RootUserEpics=combineEpics(...[loginEpic,RootProjectEpics]);
+export const RootUserEpics=combineEpics(loginEpic,RootProjectEpics,RootCompanyEpics,setUserStateEpic);
 

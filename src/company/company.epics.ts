@@ -7,5 +7,5 @@ import { fetchCompaniesFullfiled } from './company.actions';
 export const fetchCompaniesEpic=(action$:ActionsObservable<Action>,store:Store<AppState>,deps:EpicDependencies)=>action$.ofType(FETCH_PROJECTS_SUCCESS)
 .map(()=>{
   const companies=Object.keys(store.getState().userState.companyState.companyEntities).map((id)=>store.getState().userState.companyState.companyEntities[id]);
-  fetchCompaniesFullfiled(companies);
+  return fetchCompaniesFullfiled(companies);
 });

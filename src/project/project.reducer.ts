@@ -9,18 +9,32 @@ export interface ProjectEntities{
 export interface ProjectState{
   projectEntities:ProjectEntities;
   ids:number[];
-  selectedProjectId:number;
+  selectedProject:Project;
 }
-export function ProjectReducer(state:ProjectState=null,action:Action):ProjectState{
+const initProjectState:ProjectState={
+  projectEntities:{},
+  ids:[],
+  selectedProject:null
+}
+export function ProjectReducer(state:ProjectState=initProjectState,action:Action):ProjectState{
   switch(action.type){
     default : {
       return state;
     }
-    case ProjectActions.FETCH_PROJECTS_SUCCESS:{
+    case ProjectActions.SELECT_PROJECT:{
       return {
-        ...state
+        ...state,
+        selectedProject:(<ProjectActions.SelectProjectAction>action).selectedProject
+      }
+    }
+    case ProjectActions.FETCH_PROJECTS_SUCCESS:{
+      const projects =(<ProjectActions.FetchProjectsAction>action).projects;
+      return {
+        ...state,
+        projectEntities:projects.reduce((entities,project)=>{entities[project.projectId]=project;return entities},{}),
+        ids:projects.map(p=>p.projectId)
       }
     }
   }
 }
-export const RootProjectEpics=combineEpics(...[fetchProjectsEpic]);
+export const RootProjectEpics=fetchProjectsEpic;
