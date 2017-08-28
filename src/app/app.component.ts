@@ -1,3 +1,4 @@
+import { HomePage } from './../pages/home/home';
 import { TabsPage } from './../pages/tabs/tabs';
 import { Observable } from 'rxjs/Observable';
 import { inspect } from 'util';

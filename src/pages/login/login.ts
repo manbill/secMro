@@ -38,7 +38,7 @@ import { setNavCtrl } from "../../app/app.actions";
 export class LoginPage {
   loginForm: FormGroup;
   unsubscription: Unsubscribe;
-  constructor(public navCtrl: NavController,
+  constructor(private navCtrl: NavController,
     private fb: FormBuilder,
     private http: Http,
     @Inject(AppStore) private store: Store<AppState>,
@@ -71,6 +71,7 @@ export class LoginPage {
     this.unsubscription = this.store.subscribe(() => {
       console.log(this.store.getState().currentUser.currentUser.realname,++count);
     });
+    this.navCtrl.push(SelectCompanyProjectPage);
   }
   ionViewDidLoad() {
     console.log('ionViewDidLoad LoginPage');

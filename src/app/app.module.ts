@@ -37,10 +37,10 @@ import { LocalStorageProvider } from '../providers/local-storage/local-storage';
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    AboutPage,
-    ContactPage,
-    HomePage,
     TabsPage,
+    ContactPage,
+    AboutPage,
+    HomePage,
     LoginPage,
     SelectCompanyProjectPage
   ],
