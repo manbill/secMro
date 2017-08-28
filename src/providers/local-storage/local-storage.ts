@@ -8,11 +8,17 @@ import 'rxjs/add/operator/map';
   See https://angular.io/docs/ts/latest/guide/dependency-injection.html
   for more info on providers and Angular DI.
 */
+const  USER_ID='USER_ID';
 @Injectable()
 export class LocalStorageProvider {
 
-  constructor(public http: Http) {
+  constructor() {
     console.log('Hello LocalStorageProvider Provider');
   }
-
+   getLastLoginUserId(){
+    return window.localStorage.getItem(USER_ID)?+window.localStorage.getItem(USER_ID):null;
+  }
+   setLoginUserId(id:string|number){
+    return window.localStorage.setItem(USER_ID,id+"");
+  }
 }

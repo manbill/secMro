@@ -38,58 +38,6 @@ export class MyApp {
       let startTime = Date.now();
       dbOp
         .initSqlVersions()
-        .switchMap(() => {
-          console.log("MroUtils.getLastLoginUserId()", MroUtils.getLastLoginUserId());
-          if (!MroUtils.getLastLoginUserId()) {
-            return Observable.of(null);
-          }
-          const loading = loadingCtrl.create({
-            content: '初始化用户信息...',
-            dismissOnPageChange: true
-          });
-          loading.present();
-          return dbOp.executeSql(`select * from ${tableNames.eam_user} where UserId=?`, [+MroUtils.getLastLoginUserId()])
-            .map((res) => {
-              let userState: UserState = {
-                currentUser: null,
-                userProject: {
-                  currentProject:null,
-                  lastSelectedProject:null,
-                  projects:[]
-                },
-                userCompany: {
-                  companyEntities:{},
-                  currentCompany:null,
-                  ids:[],
-                  lastSelectedCompany:null
-                }
-              };
-              if (res.rows.length > 0) {//首次使用
-                const record = res.rows.item(0);
-                console.log(record);
-                userState.currentUser = JSON.parse(record['userJson']);
-                userState.userProject.currentProject = userState.userProject.lastSelectedProject = JSON.parse(record['selectedProjectJson']);
-                userState.userProject.projects = JSON.parse(record['userProjectsJson']);
-                userState.userCompany.currentCompany = userState.userCompany.lastSelectedCompany = JSON.parse(record['selectedCompanyJson']);
-                const companies: Company[] = JSON.parse(record['userCompaniesJson']) || [];
-                userState.userCompany.ids = companies.map(((company) => company.companyId));
-                userState.userCompany.companyEntities = companies.reduce((entities, company) => {
-                  entities[company.companyId] = company;
-                  return entities;
-                }, {});
-              }
-              console.log("缓存的用户状态：", userState);
-              loading.dismiss();
-              return userState;
-            })
-            .catch((e: Error) => {
-              console.error(e);
-              loading.dismiss();
-              let err = new MroError(MroErrorCode.user_info_db_upsert_error_code, `初始化用户信息,${e.message}`, inspect(e))
-              errorHandler.handleError(err);
-              return null;
-            })
-        })
         .subscribe(
         userState => {
           console.log("开始初始化AppStore", userState)

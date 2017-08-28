@@ -1,124 +1,36 @@
-import { TabsPage } from './../pages/tabs/tabs';
-import { userLoginComplete, CHANGE_COMPANY, ChangeCompanyAction, INIT_USER_STATE, InitUserStateAction } from './../user/user.actions';
-import { inspect } from 'util';
-import { MroError, generateMroError, MroErrorCode } from './../app/mro-error-handler';
-import { tableNames } from './../providers/db-operation/mro.tables';
-import { Observable } from 'rxjs/Observable';
-import { SetProjectsAction, fetchProjects, selectProject, initProjectState } from './../project/project.actions';
-import { Store } from 'redux';
-import { AppState, EpicDependencies } from './../app/app.reducer';
-import { ActionsObservable } from 'redux-observable';
-import { combineEpics } from 'redux-observable';
-import { Action, ActionCreator } from 'redux';
-import { Company } from "./company.modal";
+import { Company } from './company.modal';
+import { Action } from 'redux';
 import * as CompanyActions from "./company.actions";
-import 'rxjs/add/observable/of';
-import 'rxjs/add/operator/mapTo';
-import 'rxjs/add/operator/switchMap';
-import 'rxjs/add/operator/catch';
-
-export interface CompanyEntities {
-  [id: number]: Company
+import { Project } from '../project/project.modal';
+export interface CompanyEntities{
+  [id:number]:Company;
 }
-export interface CompanyState {
-  companyEntities: CompanyEntities,
-  ids: number[];
-  currentCompany: Company;
-  lastSelectedCompany:Company;
+export interface CompanyState{
+  companyEntities:CompanyEntities;
+  ids:number[];
+  selectedCompany:Company;
 }
-const company = new Company();
-company.companyId = 1;
-company.companyName = `上海电气风电集团有限公司`;
-company.projectIds = [];
-const initialCompanyState = {
-  companyEntities: [company].reduce((entities, c) => {entities[c.companyId]=c;return entities}, {}),
-  ids: [company].map((c) => c.companyId),
-  currentCompany: company,
-  lastSelectedCompany:company
+const company=new Company();
+company.companyId=1;
+company.companyName="上海电气风电集团有限公司";
+company.projectIds=[];
+const initState:CompanyState={
+  companyEntities:[company].reduce((entities,c)=>{entities[c.companyId]=c;return entities},{}),
+  ids:[company].map(c=>c.companyId),
+  selectedCompany:company,
 }
-export const CompanyReducer = (state: CompanyState = initialCompanyState, action: Action): CompanyState => {
-  switch (action.type) {
-    default: {
-      return state
+export function CompanyReducer(state:CompanyState=initState,action:Action):CompanyState{
+  switch(action.type){
+    default:{
+      return state;
     }
-    case CompanyActions.INIT_COMPANY_STATE:{
-      return (<CompanyActions.InitCompanyStateAction>action).companyState;
-    }
-    case CompanyActions.SET_COMPANIES: {
-      const companies = (<CompanyActions.SetCompaniesAction>action).companies;
+    case CompanyActions.FETCH_COMPANIES_FULLFILED:{
+      const companies =(<CompanyActions.FetchCompaniesAction>action).companies;
       return {
         ...state,
-        ids: companies.map((company) => company.companyId),
-        companyEntities: companies.reduce((entities, company) => {entities[company.companyId] = company;return entities}, {})
-      }
-    }
-    case CHANGE_COMPANY:{
-      return {
-        ...state,
-        currentCompany: (<ChangeCompanyAction>action).company,
-      }
-    }
-    case CompanyActions.SELECT_COMPANY: {
-      return {
-        ...state,
-        currentCompany: (<CompanyActions.SelectCompanyAction>action).selectedCompany,
-        lastSelectedCompany:(<CompanyActions.SelectCompanyAction>action).selectedCompany
+        companyEntities:companies.reduce((entites,c)=>{entites[c.companyId]=c;return entites},{}),
+        ids:companies.map((c)=>c.companyId)
       }
     }
   }
 }
-export const selectCompanyEpic=(action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies)=>{
-  return action$.ofType(CompanyActions.SELECT_COMPANY)
-  .switchMap((action:CompanyActions.SelectCompanyAction)=>{
-    const loading =deps.loadingCtrl.create({
-      content:'更新所选公司信息...',
-      dismissOnPageChange:true
-    });
-    loading.present();
-    return deps.dbOperation.executeSql(`update ${tableNames.eam_user} set selectedCompanyJson=? where userId=?`,[JSON.stringify(action.selectedCompany),store.getState().currentUser.currentUser.id])
-    .do(()=>loading.dismiss())
-	// ✔待确定的动作 @done (August 27th 2017, 16:56)
-    .mapTo(CompanyActions.selectCompanyComplete())
-    .catch((e)=>{
-      loading.dismiss();
-      let err: MroError = new MroError(MroErrorCode.user_info_db_update_error_code, `更新选中公司失败，${e.message}`, inspect(e));
-      console.error(`${err.errorMessage},原因：`,e);
-      return Observable.of(generateMroError(err))
-    })
-  })
-}
-export const fetchCompaniesEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
-  return action$.ofType(CompanyActions.FETCH_COMPANIES)
-    .switchMap(() => {
-      const company = new Company();
-      company.companyId = 1;
-      company.companyName = `上海电气风电集团有限公司`;
-      company.projectIds = store.getState().currentUser.userProject.projects.map((project) => project.projectId);
-      return Observable.of(CompanyActions.setCompanies([company]))
-    })
-}
-export const setCompaniesEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
-  return action$.ofType(CompanyActions.SET_COMPANIES)
-    .switchMap((action: CompanyActions.SetCompaniesAction) => {
-      const loading =deps.loadingCtrl.create({
-        content:'用户公司下的项目信息写入到数据库...',
-        dismissOnPageChange:true
-      });
-      loading.present();
-      return deps.dbOperation.executeSql(`update ${tableNames.eam_user} set userCompaniesJson=? where userId=?`, [JSON.stringify(action.companies), store.getState().currentUser.currentUser.id])
-      .do(()=>loading.dismiss())
-	// ✔ 待确认 @done (August 27th 2017, 16:48)
-        .map(()=>{
-          store.getState().navCtrl.navCtrl.push(TabsPage);
-          return userLoginComplete();
-        })
-        .catch((e)=>{
-          loading.dismiss();
-          let err: MroError = new MroError(MroErrorCode.user_info_db_update_error_code, `更新用户表格中的公司失败，${e.message}`, inspect(e));
-          console.error(`${err.errorMessage},原因：`,e);
-          return Observable.of(generateMroError(err))
-        })
-    })
-
-}
-export const rootCompanyEpic = combineEpics(...[setCompaniesEpic,selectCompanyEpic,fetchCompaniesEpic]);

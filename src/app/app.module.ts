@@ -1,5 +1,5 @@
 import { SelectCompanyProjectPage } from './../pages/select-company-project/select-company-project';
-import { AppStoreProvider } from './app.store';
+import { MroAppStoreProvider } from './app.store';
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule } from 'ionic-angular';
@@ -18,6 +18,7 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { ReactiveFormsModule } from "@angular/forms";
 import { DbOperationProvider } from '../providers/db-operation/db-operation';
 import { LocalStorageProvider } from '../providers/local-storage/local-storage';
+import { MroApiProvider } from '../providers/mro-api/mro-api';
 @NgModule({
   declarations: [
     MyApp,
@@ -51,7 +52,8 @@ import { LocalStorageProvider } from '../providers/local-storage/local-storage';
     {provide: ErrorHandler, useClass: MroErrorHandler},
     DbOperationProvider,
     LocalStorageProvider,
-    AppStoreProvider
+    MroApiProvider,
+    MroAppStoreProvider,
   ]
 })
 export class AppModule {}

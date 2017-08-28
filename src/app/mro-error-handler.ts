@@ -63,7 +63,9 @@ const GENERATE_MRO_ERROR='generate_mro_error';
 export interface GenerateMroErrorAction extends Action{
   error:MroError
 }
-export const generateMroError:ActionCreator<GenerateMroErrorAction>=(error:MroError)=>({
-  type:GENERATE_MRO_ERROR,
-  error:error
-})
+export function generateMroError(e:MroError):GenerateMroErrorAction{
+  return {
+    type:GENERATE_MRO_ERROR,
+    error:e
+  }
+}
