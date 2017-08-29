@@ -14,6 +14,7 @@ import { MroError, MroErrorCode, generateMroError } from '../app/mro-error-handl
 import { loginSuccess } from './user.actions';
 import { User } from './user.modal';
 import { MroUtils } from '../common/mro-util';
+import { MroResponse } from '../common/mro-response';
 
 
 export const loginEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
@@ -25,12 +26,11 @@ export const loginEpic = (action$: ActionsObservable<Action>, store: Store<AppSt
       });
       loading.present();
       return deps.http.post(deps.mroApis.loginApi, action.userInfo)
-        .do((res) => { console.log('登录返回的信息，', res.json()); loading.dismiss(); })
-        .map(res => loginSuccess(res.json().data as User))
+        .map((res:MroResponse) => loginSuccess(res.data as User))
         .catch((e: Error) => {
           console.error(e);
           loading.dismiss();
-          const err = new MroError(MroErrorCode.user_login_error_code, `登录失败,${e.message}`, JSON.stringify(e));
+          const err = new MroError(MroErrorCode.user_login_error_code, `登录失败`, JSON.stringify(e));
           return Observable.of(generateMroError(err));
         });
     });

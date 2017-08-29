@@ -10,6 +10,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/observable/of';
+import { MroResponse } from '../common/mro-response';
 
 export const fetchProjectsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => action$.ofType(LOGIN_SUCCESS)
 .switchMap(()=>{
@@ -17,15 +18,14 @@ export const fetchProjectsEpic = (action$: ActionsObservable<Action>, store: Sto
     content:'获取项目...'
   });
   loading.present();
-  return deps.http.post(deps.mroApis.fetchProjectsApi,{},MroUtils.generatePostReqArgs(store.getState().userState.currentUser.token))
-  .do((res)=>{
+  return deps.http.post(deps.mroApis.fetchProjectsApi,{})
+  .do((res:MroResponse)=>{
     loading.dismiss();
-    console.log("返回的项目信息：",res.json().data);
   })
-  .map(res=>fetchProjectsSuccess(res.json().data))
+  .map((res:MroResponse)=>fetchProjectsSuccess(res.data))
   .catch((e:Error)=>{
     console.error(e);
-      let err = new MroError(MroErrorCode.fetch_projects_error_code,`获取项目失败，${e.message}`,JSON.stringify(e));
+      let err = new MroError(MroErrorCode.fetch_projects_error_code,`获取项目失败`,JSON.stringify(e));
       return Observable.of(generateMroError(err));
   })
 })

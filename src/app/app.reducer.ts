@@ -1,7 +1,7 @@
 import { errorHandleEpic } from './app.epics';
 import { Http } from '@angular/http';
 import { DbOperationProvider } from '../providers/db-operation/db-operation';
-import { LoadingController } from 'ionic-angular';
+import { LoadingController, AlertController } from 'ionic-angular';
 import { UserState, UserRootReducer, RootUserEpics } from '../user/user.reducer';
 import { combineReducers } from 'redux';
 import { MroApiEntities } from '../providers/mro-api/mro-api';
@@ -15,6 +15,7 @@ export interface EpicDependencies{
   db:DbOperationProvider;
   loading:LoadingController;
   mroApis:MroApiEntities;
+  alterCtrl:AlertController
 }
 export  const RootReducer=combineReducers({
   userState:UserRootReducer

@@ -9,13 +9,14 @@ export const errorHandleEpic=(action$:ActionsObservable<Action>,store:Store<AppS
   return action$.ofType(GENERATE_MRO_ERROR)
   .switchMap((action:HandleErrorActions.GenerateMroErrorAction)=>{
       const loading = deps.loading.create({
-        content:action.error.errorMessage+"<br/>原因："+action.error.errorReason,
+        content:action.error.errorMessage,
         duration:1000*60,
         spinner: 'hide',
         enableBackdropDismiss:true,
         cssClass:'error'
       });
       loading.present();
+      console.error(action.error);
       return Observable.of(HandleErrorActions.errorHandled());
   })
 }
