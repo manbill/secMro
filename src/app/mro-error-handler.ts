@@ -57,7 +57,8 @@ export enum MroErrorCode {
   user_login_error_code,
   user_info_db_upsert_error_code,
   user_info_db_update_error_code,
-  fetch_projects_error_code
+  fetch_projects_error_code,
+  fetch_warehouse_error_code
 }
 export const GENERATE_MRO_ERROR='generate_mro_error';
 export const HANDLED_ERROR="handled_error";

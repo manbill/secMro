@@ -38,13 +38,14 @@ export class MyApp {
       dbOp
         .initSqlVersions()
         .subscribe(
-        userState => {
-          console.log("开始初始化AppStore", userState)
-          if (!userState) {
+        () => {
+
+          if (!MroUtils.getLastLoginUserId()) {
+            console.log("首次使用App")
             this.nav.push(LoginPage);
             return;
           }
-          this.nav.push(TabsPage,{userState:userState});
+          this.nav.push(TabsPage);
         },
         e => console.error(e),
         () => console.log("初始化数据库版本完成", Date.now() - startTime, '毫秒')

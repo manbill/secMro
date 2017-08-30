@@ -1,3 +1,4 @@
+import { AppState } from './../app/app.reducer';
 import { ActionCreator, Action } from 'redux';
 import { UserState } from './user.reducer';
 import { User } from './user.modal';

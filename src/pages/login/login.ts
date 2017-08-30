@@ -62,8 +62,11 @@ export class LoginPage {
     );
     let count = 0;
     this.unsubscription = this.store.subscribe(() => {
-      console.log(this.store.getState().userState.currentUser.realname,++count);
+      //do nothing;
     });
+    if(this.store.getState().userState.currentUser.id!==localStorage.get){
+
+    }
     this.navCtrl.push(SelectCompanyProjectPage);
   }
   ionViewDidLoad() {

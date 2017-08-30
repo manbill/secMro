@@ -1,3 +1,5 @@
+import { WarehouseState, WarehouseReducer, RootWarehouseEpics } from './../app/warehouse/warehouse.reducer';
+import { Warehouse } from './../app/warehouse/warehouse.modal';
 import { RootCompanyEpics } from './../company/company.reducer';
 import { User } from './user.modal';
 import { combineReducers, Action } from 'redux';
@@ -11,6 +13,7 @@ export interface UserState{
   companyState:CompanyState;
   currentUser:User;
   lastLoginTime:number;
+  warehouseState:WarehouseState
 }
 export function UserReducer(state:User=null,action:Action):User{
   switch(action.type){
@@ -39,7 +42,8 @@ export const UserRootReducer=combineReducers({
   projectState:ProjectReducer,
   companyState:CompanyReducer,
   currentUser:UserReducer,
-  lastLoginTime:LastLoginTimeReducer
+  lastLoginTime:LastLoginTimeReducer,
+  warehouseState:WarehouseReducer
 });
-export const RootUserEpics=combineEpics(loginEpic,RootProjectEpics,RootCompanyEpics,setUserStateEpic);
+export const RootUserEpics=combineEpics(loginEpic,RootProjectEpics,RootCompanyEpics,setUserStateEpic,RootWarehouseEpics);
 

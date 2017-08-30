@@ -24,6 +24,7 @@ export const fetchProjectsEpic = (action$: ActionsObservable<Action>, store: Sto
   })
   .map((res:MroResponse)=>fetchProjectsSuccess(res.data))
   .catch((e:Error)=>{
+    loading.dismiss();
     console.error(e);
       let err = new MroError(MroErrorCode.fetch_projects_error_code,`获取项目失败`,JSON.stringify(e));
       return Observable.of(generateMroError(err));

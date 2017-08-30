@@ -31,7 +31,7 @@ export class SelectCompanyProjectPage {
   companies: Company[];
   companyProjects: Project[];
   constructor(public navCtrl: NavController, private fb: FormBuilder, @Inject(AppStore) private store: Store<AppState>, public navParams: NavParams) {
-    this.store.subscribe(()=>{
+    this.unsubscribeStore = this.store.subscribe(()=>{
       this.update();
     })
     this.createSelectProjectForm();

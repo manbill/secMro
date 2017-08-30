@@ -1,7 +1,8 @@
+import { AppState } from './../app/app.reducer';
 import { tableNames } from './../providers/db-operation/mro.tables';
 import { SELECT_PROJECT } from './../project/project.actions';
 import { ActionsObservable } from 'redux-observable';
-import { AppState, EpicDependencies } from '../app/app.reducer';
+import { EpicDependencies } from '../app/app.reducer';
 import { Store, Action } from 'redux';
 import * as UserActions from "./user.actions";
 import 'rxjs/add/operator/do';
@@ -20,13 +21,15 @@ import { MroResponse } from '../common/mro-response';
 export const loginEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(UserActions.LOGIN_ACTION)
     .switchMap((action: UserActions.LoginAction) => {
-      console.log(`用户登录action`,action.userInfo);
       const loading = deps.loading.create({
         content: '登录中...'
       });
       loading.present();
       return deps.http.post(deps.mroApis.loginApi, action.userInfo)
-        .map((res:MroResponse) => loginSuccess(res.data as User))
+        .do(() => loading.dismiss())
+        .map((res: MroResponse) => {
+          return loginSuccess(res.data as User)
+        })
         .catch((e: Error) => {
           console.error(e);
           loading.dismiss();
@@ -52,10 +55,10 @@ export const setUserStateEpic = (action$: ActionsObservable<Action>, store: Stor
       return deps.db.sqlBatch(sqls)
         .do(() => loading.dismiss())
         .mapTo(UserActions.setUserStateComplete())
-        .catch((e:Error)=>{
+        .catch((e: Error) => {
           loading.dismiss();
           console.error(e);
-          let err =new MroError(MroErrorCode.user_info_db_upsert_error_code,`删除、更新用户状态信息失败，${e.message}`,JSON.stringify(e));
+          let err = new MroError(MroErrorCode.user_info_db_upsert_error_code, `删除、更新用户状态信息失败，${e.message}`, JSON.stringify(e));
           return Observable.of(generateMroError(err));
         })
     })

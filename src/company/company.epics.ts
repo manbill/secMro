@@ -1,3 +1,5 @@
+import { MroUtils } from './../common/mro-util';
+import { Company } from './company.modal';
 import { ActionsObservable } from 'redux-observable';
 import { Store, Action } from 'redux';
 import { FETCH_PROJECTS_SUCCESS } from '../project/project.actions';
@@ -7,5 +9,5 @@ import { fetchCompaniesFullfiled } from './company.actions';
 export const fetchCompaniesEpic=(action$:ActionsObservable<Action>,store:Store<AppState>,deps:EpicDependencies)=>action$.ofType(FETCH_PROJECTS_SUCCESS)
 .map(()=>{
   const companies=Object.keys(store.getState().userState.companyState.companyEntities).map((id)=>store.getState().userState.companyState.companyEntities[id]);
-  return fetchCompaniesFullfiled(companies);
+  return fetchCompaniesFullfiled(companies.map((company:Company)=>{company.projectIds=store.getState().userState.projectState.ids;return company}));
 });

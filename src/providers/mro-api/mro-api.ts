@@ -13,7 +13,7 @@ export interface MroApiEntities{
   logoutApi:string;
   fetchProjectsApi:string;
   fetchCompaniesApi:string;
-
+  fetchWarehouse:string;
 }
 @Injectable()
 export class MroApiProvider {
@@ -22,6 +22,7 @@ export class MroApiProvider {
     logoutApi:Apis.Api_logout,
     fetchCompaniesApi:"todo",
     fetchProjectsApi:Apis.Api_getUserProject,
+    fetchWarehouse:Apis.Api_getWarehouse
   }
   constructor() {
   }

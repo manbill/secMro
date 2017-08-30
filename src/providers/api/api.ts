@@ -5,3 +5,4 @@
  export const Api_getUpgradeVersionInfo=baseUrl+"/common/getUpgradeVersionInfo.api";
  export const Api_logout = "/api/user/logout.api";
  export const Api_getProfileInfo = "/api/user/getProfileInfo.api";
+ export const Api_getWarehouse = baseUrl + "/api/common/getRepertory.api";

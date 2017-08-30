@@ -17,7 +17,6 @@ import { SQLite } from "@ionic-native/sqlite";
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { ReactiveFormsModule } from "@angular/forms";
 import { DbOperationProvider } from '../providers/db-operation/db-operation';
-import { LocalStorageProvider } from '../providers/local-storage/local-storage';
 import { MroApiProvider } from '../providers/mro-api/mro-api';
 import { HttpInterceptorModule } from "ng-http-interceptor";
 @NgModule({
@@ -53,7 +52,6 @@ import { HttpInterceptorModule } from "ng-http-interceptor";
     SplashScreen,
     {provide: ErrorHandler, useClass: MroErrorHandler},
     DbOperationProvider,
-    LocalStorageProvider,
     MroApiProvider,
     MroAppStoreProvider,
   ]

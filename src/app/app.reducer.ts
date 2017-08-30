@@ -15,7 +15,7 @@ export interface EpicDependencies{
   db:DbOperationProvider;
   loading:LoadingController;
   mroApis:MroApiEntities;
-  alterCtrl:AlertController
+  alterCtrl:AlertController,
 }
 export  const RootReducer=combineReducers({
   userState:UserRootReducer
