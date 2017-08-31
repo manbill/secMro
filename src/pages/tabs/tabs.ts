@@ -13,7 +13,7 @@ import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { AboutPage } from '../about/about';
 import { ContactPage } from '../contact/contact';
 import { HomePage } from '../home/home';
-import { moment } from "moment";
+import { Duration } from "moment";
 @Component({
   templateUrl: 'tabs.html'
 })
@@ -60,7 +60,7 @@ export class TabsPage implements OnInit, OnDestroy {
           })
           .subscribe((userState: UserState) => {
             if (userState) {
-              if (moment(userState.lastLoginTime).daysInMonth()!==moment().daysInMonth()) {//如果每天的首次使用，需要重新登录，即如果不是同一天了，需要重新登录
+              if (new Date(userState.lastLoginTime).getDay()!==new Date().getDay()) {//如果每天的首次使用，需要重新登录，即如果不是同一天了，需要重新登录
                 console.log("每天首次使用，需要重新登录");
                 reject();
                 return;
