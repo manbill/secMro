@@ -54,7 +54,10 @@ export const setUserStateEpic = (action$: ActionsObservable<Action>, store: Stor
       ])
       return deps.db.sqlBatch(sqls)
         .do(() => loading.dismiss())
-        .mapTo(UserActions.setUserStateComplete())
+        .map(()=>{
+          MroUtils.setLoginUserId(user.id);
+          return UserActions.setUserStateComplete();
+        })
         .catch((e: Error) => {
           loading.dismiss();
           console.error(e);

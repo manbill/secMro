@@ -1,3 +1,5 @@
+import { WarehouseState, WarehouseReducer, RootWarehouseEpics } from './../warehouse/warehouse.reducer';
+import { Warehouse } from './../warehouse/warehouse.modal';
 import { errorHandleEpic } from './app.epics';
 import { Http } from '@angular/http';
 import { DbOperationProvider } from '../providers/db-operation/db-operation';
@@ -8,7 +10,8 @@ import { MroApiEntities } from '../providers/mro-api/mro-api';
 import { combineEpics } from 'redux-observable';
 import { HttpInterceptorService } from "ng-http-interceptor";
 export interface AppState{
-  userState:UserState
+  userState:UserState,
+  warehouseState:WarehouseState
 }
 export interface EpicDependencies{
   http:Http;
@@ -18,6 +21,7 @@ export interface EpicDependencies{
   alterCtrl:AlertController,
 }
 export  const RootReducer=combineReducers({
-  userState:UserRootReducer
+  userState:UserRootReducer,
+  warehouseState:WarehouseReducer
 });
-export const RootEpics=combineEpics(RootUserEpics,errorHandleEpic);
+export const RootEpics=combineEpics(RootUserEpics,errorHandleEpic,RootWarehouseEpics);

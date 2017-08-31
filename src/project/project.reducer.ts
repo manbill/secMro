@@ -1,3 +1,4 @@
+import { InitUserStateAction,INIT_USER_STATE } from './../user/user.actions';
 import { Project } from './project.modal';
 import { Action } from 'redux';
 import * as ProjectActions from "./project.actions";
@@ -20,6 +21,9 @@ export function ProjectReducer(state:ProjectState=initProjectState,action:Action
   switch(action.type){
     default : {
       return state;
+    }
+    case INIT_USER_STATE:{
+      return (<InitUserStateAction>action).userState.projectState;
     }
     case ProjectActions.SELECT_PROJECT:{
       return {

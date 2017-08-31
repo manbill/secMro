@@ -1,3 +1,4 @@
+import { MroUtils } from './../../common/mro-util';
 import { SelectCompanyProjectPage } from './../select-company-project/select-company-project';
 import { User } from './../../user/user.modal';
 import { TabsPage } from './../tabs/tabs';
@@ -62,7 +63,15 @@ export class LoginPage {
     this.unsubscription = this.store.subscribe(() => {
       //do nothing;
     });
-    this.navCtrl.push(SelectCompanyProjectPage);
+    if(this.store.getState().userState.currentUser&&
+      this.store.getState().userState.currentUser.id!==MroUtils.getLastLoginUserId()
+    ){
+      console.log('重新选择项目')
+      //登录用户改变，需要重新选择项目
+      this.navCtrl.push(SelectCompanyProjectPage);
+      return ;
+    }
+    this.navCtrl.push(TabsPage);//跳转到首页
   }
   ionViewDidLoad() {
     console.log('ionViewDidLoad LoginPage');

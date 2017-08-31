@@ -3,6 +3,7 @@ import { combineEpics } from 'redux-observable';
 import { Company } from './company.modal';
 import { Action } from 'redux';
 import * as CompanyActions from "./company.actions";
+import { INIT_USER_STATE,InitUserStateAction } from "../user/user.actions";
 import { Project } from '../project/project.modal';
 export interface CompanyEntities{
   [id:number]:Company;
@@ -31,6 +32,9 @@ export function CompanyReducer(state:CompanyState=initState,action:Action):Compa
         ...state,
         selectedCompany:(<CompanyActions.SelectCompanyAction>action).company
       }
+    }
+    case INIT_USER_STATE:{
+      return (<InitUserStateAction>action).userState.companyState;
     }
     case CompanyActions.FETCH_COMPANIES_FULLFILED:{
       const companies =(<CompanyActions.FetchCompaniesAction>action).companies;

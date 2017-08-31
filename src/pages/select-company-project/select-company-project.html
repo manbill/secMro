@@ -19,7 +19,7 @@
         <ion-option *ngFor='let company of companies' [value]='company'>{{company.companyName}}</ion-option>
       </ion-select>
     </ion-item>
-    <ion-item ng-if='selectProjectForm.get("company").valid'>
+    <ion-item ng-if='!selectProjectForm.get("company").hasError("required")'>
         <ion-label>选择项目</ion-label>
         <ion-select [compareWith]='projectCompareWith'
         okText="确定" cancelText="取消"

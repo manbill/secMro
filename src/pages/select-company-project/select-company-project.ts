@@ -58,8 +58,8 @@ export class SelectCompanyProjectPage {
   }
   createSelectProjectForm() {
     this.selectProjectForm = this.fb.group({
-      company: [null, Validators.required],
-      project: [null, Validators.required]
+      company: [this.store.getState().userState.companyState.selectedCompany, Validators.required],
+      project: [this.store.getState().userState.projectState.selectedProject, Validators.required]
     })
   }
 

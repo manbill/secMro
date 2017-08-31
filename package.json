@@ -35,6 +35,7 @@
     "ionic-angular": "3.6.0",
     "ionic-plugin-keyboard": "^2.2.1",
     "ionicons": "3.0.0",
+    "moment": "^2.18.1",
     "ng-http-interceptor": "^3.1.2",
     "redux": "^3.7.2",
     "redux-observable": "^0.16.0",

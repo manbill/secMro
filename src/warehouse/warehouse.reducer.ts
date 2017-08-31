@@ -1,4 +1,4 @@
-import { fetchCompaniesEpic } from './../../company/company.epics';
+import { fetchCompaniesEpic } from './../company/company.epics';
 import { combineEpics } from 'redux-observable';
 import { FETCH_WAREHOUSE_COMPLETE, FetchWarehouseCompleteAction } from './warehouse.actions';
 import { Action } from 'redux';

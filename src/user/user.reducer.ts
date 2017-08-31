@@ -1,5 +1,3 @@
-import { WarehouseState, WarehouseReducer, RootWarehouseEpics } from './../app/warehouse/warehouse.reducer';
-import { Warehouse } from './../app/warehouse/warehouse.modal';
 import { RootCompanyEpics } from './../company/company.reducer';
 import { User } from './user.modal';
 import { combineReducers, Action } from 'redux';
@@ -23,7 +21,7 @@ export function UserReducer(state:User=null,action:Action):User{
       return (<UserActions.LoginSuccessAction>action).user
     }
     case UserActions.INIT_USER_STATE:{
-      return (<UserActions.InitUserStateAction>action).userState.currentUser||state;;
+      return (<UserActions.InitUserStateAction>action).userState.currentUser||state;
     }
   }
 }
@@ -34,6 +32,9 @@ export function LastLoginTimeReducer(state:number=Date.now(),action:Action):numb
     }
     case UserActions.LOGIN_SUCCESS:{
       return Date.now();
+    }
+    case UserActions.INIT_USER_STATE:{
+      return (<UserActions.InitUserStateAction>action).userState.lastLoginTime;
     }
   }
 }

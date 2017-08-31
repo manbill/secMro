@@ -39,15 +39,12 @@ export class MyApp {
         .initSqlVersions()
         .subscribe(
         () => {
-
-          // if (!MroUtils.getLastLoginUserId()) {
-          //   console.log("首次使用App")
-          //   this.nav.push(LoginPage);
-          //   return;
-          // }
-          console.log("首次使用App")
-          this.nav.push(LoginPage);
-           this.nav.push(TabsPage);
+          this.nav.push(LoginPage);//如果tabsPage判断需要进入登录界面，则不会进入到tabspage
+          this.nav.push(TabsPage)
+          .then(() => {
+            console.log("成功进入Tabspage");
+          })
+          .catch(e => console.error(e));//如果能进入tabsPage，删除loginPage
         },
         e => console.error(e),
         () => console.log("初始化数据库版本完成", Date.now() - startTime, '毫秒')
