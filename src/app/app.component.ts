@@ -40,12 +40,18 @@ export class MyApp {
         .subscribe(
         () => {
 
-          if (!MroUtils.getLastLoginUserId()) {
-            console.log("首次使用App")
-            this.nav.push(LoginPage);
-            return;
+          // if (!MroUtils.getLastLoginUserId()) {
+          //   console.log("首次使用App")
+          //   this.nav.push(LoginPage);
+          //   return;
+          // }
+          console.log("首次使用App")
+          try {
+            this.nav.push(TabsPage);
+          } catch (error) {
+            console.error(error);
           }
-          this.nav.push(TabsPage);
+
         },
         e => console.error(e),
         () => console.log("初始化数据库版本完成", Date.now() - startTime, '毫秒')
