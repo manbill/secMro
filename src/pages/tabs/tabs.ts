@@ -21,31 +21,34 @@ export class TabsPage implements OnInit, OnDestroy {
     this.unsubscribe();
   }
   ngOnInit(): void {
-    throw new Error("Method not implemented.");
+    console.log("ngOnInit")
+    // throw new Error("Method not implemented.");
   }
   unsubscribe: Unsubscribe;
   tab1Root = HomePage;
   tab2Root = AboutPage;
   tab3Root = ContactPage;
-  constructor(private sqlite: DbOperationProvider, private navCtrl:NavController,@Inject(AppStore) private store: Store<AppState>) {
+  constructor(private sqlite: DbOperationProvider, private navCtrl: NavController, @Inject(AppStore) private store: Store<AppState>) {
+    console.log("TabsPage,constructor");
     this.unsubscribe = store.subscribe(() => {
 
     })
   }
   ionViewCanEnter() {
-    return !!!MroUtils.getLastLoginUserId();
-    // return new Promise((resovle,reject)=>{
-    //   if(MroUtils.getLastLoginUserId()){
-    //     setTimeout(()=> {
-    //       resovle();
-    //       console.log("TabsPage,ionViewCanEnter,resovle");
-    //       return true;
-    //     }, 2000);
-    //   }else{
-    //     reject();
-    //     console.log("TabsPage,ionViewCanEnter,reject");
-    //     return false;
-    //   }
-    // });
+    console.log("getViews",this.navCtrl.getViews());
+    console.log("getActive",this.navCtrl.getActive());
+    console.log("getPrevious",this.navCtrl.getPrevious());
+    console.log("last",this.navCtrl.last());
+    console.log("first",this.navCtrl.first());
+    return new Promise((resolve, reject) => {
+      if (MroUtils.getLastLoginUserId()) {
+        console.log("resolve");
+        resolve();
+      } else {
+        // this.navCtrl.push(LoginPage);
+        console.log("reject",this.navCtrl.getViews());
+        reject();
+      }
+    });
   }
 }

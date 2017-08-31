@@ -13,7 +13,6 @@ export interface UserState{
   companyState:CompanyState;
   currentUser:User;
   lastLoginTime:number;
-  warehouseState:WarehouseState
 }
 export function UserReducer(state:User=null,action:Action):User{
   switch(action.type){
@@ -42,8 +41,7 @@ export const UserRootReducer=combineReducers({
   projectState:ProjectReducer,
   companyState:CompanyReducer,
   currentUser:UserReducer,
-  lastLoginTime:LastLoginTimeReducer,
-  warehouseState:WarehouseReducer
+  lastLoginTime:LastLoginTimeReducer
 });
-export const RootUserEpics=combineEpics(loginEpic,RootProjectEpics,RootCompanyEpics,setUserStateEpic,RootWarehouseEpics);
+export const RootUserEpics=combineEpics(loginEpic,RootProjectEpics,RootCompanyEpics,setUserStateEpic);
 

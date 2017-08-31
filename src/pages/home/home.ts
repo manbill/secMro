@@ -14,6 +14,11 @@ export class HomePage {
     private navParams: NavParams) {
   }
  ionViewDidLoad(){
-   console.log('home');
+  //  console.log('home');
+  console.log("getViews",this.navCtrl.getViews());
+  console.log("getActive",this.navCtrl.getActive());
+  console.log("getPrevious",this.navCtrl.getPrevious());
+  console.log("last",this.navCtrl.last());
+  console.log("first",this.navCtrl.first());
  }
 }

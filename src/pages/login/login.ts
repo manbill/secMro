@@ -51,7 +51,6 @@ export class LoginPage {
     });
   }
   login() {
-    let actionCount = 0;
     this.store.dispatch(login(
       {
         userName: this.loginForm.get('userName').value,
@@ -60,13 +59,9 @@ export class LoginPage {
       }
     )
     );
-    let count = 0;
     this.unsubscription = this.store.subscribe(() => {
       //do nothing;
     });
-    if(this.store.getState().userState.currentUser.id!==localStorage.get){
-
-    }
     this.navCtrl.push(SelectCompanyProjectPage);
   }
   ionViewDidLoad() {
@@ -74,7 +69,7 @@ export class LoginPage {
   }
   ionViewDidLeave() {
     console.log('ionViewDidLeave LoginPage');
-    this.unsubscription();
+    this.unsubscription&&this.unsubscription();
   }
 
 }

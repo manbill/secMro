@@ -46,12 +46,8 @@ export class MyApp {
           //   return;
           // }
           console.log("首次使用App")
-          try {
-            this.nav.push(TabsPage);
-          } catch (error) {
-            console.error(error);
-          }
-
+          this.nav.push(LoginPage);
+           this.nav.push(TabsPage);
         },
         e => console.error(e),
         () => console.log("初始化数据库版本完成", Date.now() - startTime, '毫秒')
