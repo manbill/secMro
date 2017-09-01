@@ -21,6 +21,7 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/of';
 import { LoginPage } from "../pages/login/login";
 import { MroErrorCode, MroError } from "./mro-error-handler";
+import { initUserState } from "../user/user.actions";
 
 @Component({
   templateUrl: 'app.html'
@@ -37,14 +38,41 @@ export class MyApp {
       let startTime = Date.now();
       dbOp
         .initSqlVersions()
+        .switchMap(() => {
+          if (!MroUtils.getLastLoginUserId()) {
+            console.log("用户从未登录过")
+            return Observable.of(null);//用户从未登录过
+          }
+          //登录过，使用数据库中的数据初始化应用
+          dbOp.executeSql(`select * from ${tableNames.eam_user} where userId=?`, [MroUtils.getLastLoginUserId()])
+            .map((res) => {
+              let userState: UserState;
+              if (res.rows.length > 0) {
+                userState = JSON.parse(res.rows.item(0)["userStateJson"]);
+              }
+              return userState;
+            })
+        })
+        .switchMap((userState: UserState) => {
+          let isLogin = false;
+          if (userState) {
+            this.store.dispatch(initUserState(userState));
+            if (new Date(userState.lastLoginTime).getDay() !== new Date().getDay()) {
+              isLogin = true;
+            }
+          } else {
+            isLogin = true;
+          }
+          // ☐ 判断一下是否完成了基础数据下载、或需要重新登登
+          return Observable.of(isLogin);
+        })
         .subscribe(
-        () => {
-          this.nav.push(LoginPage);//如果tabsPage判断需要进入登录界面，则不会进入到tabspage
-          this.nav.push(TabsPage)
-          .then(() => {
-            console.log("成功进入Tabspage");
-          })
-          .catch(e => console.error(e));//如果能进入tabsPage，删除loginPage
+        (isLogin) => {
+          if (isLogin) {
+            this.nav.push(LoginPage);
+            return;
+          }
+          this.nav.push(TabsPage);
         },
         e => console.error(e),
         () => console.log("初始化数据库版本完成", Date.now() - startTime, '毫秒')
