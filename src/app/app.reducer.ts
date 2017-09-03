@@ -1,3 +1,5 @@
+import { BaseDataReducer, RootBaseDataEpics, BaseDataState } from './../base-data/base-data.reducer';
+import { FormGroup } from '@angular/forms';
 import { WarehouseState, WarehouseReducer, RootWarehouseEpics } from './../warehouse/warehouse.reducer';
 import { Warehouse } from './../warehouse/warehouse.modal';
 import { errorHandleEpic } from './app.epics';
@@ -11,6 +13,7 @@ import { combineEpics } from 'redux-observable';
 import { HttpInterceptorService } from "ng-http-interceptor";
 export interface AppState{
   userState:UserState,
+  baseDataState:BaseDataState,
   warehouseState:WarehouseState
 }
 export interface EpicDependencies{
@@ -22,6 +25,7 @@ export interface EpicDependencies{
 }
 export  const RootReducer=combineReducers({
   userState:UserRootReducer,
+  baseDataState:BaseDataReducer,
   warehouseState:WarehouseReducer
 });
-export const RootEpics=combineEpics(RootUserEpics,errorHandleEpic,RootWarehouseEpics);
+export const RootEpics=combineEpics(RootUserEpics,errorHandleEpic,RootWarehouseEpics,RootBaseDataEpics);

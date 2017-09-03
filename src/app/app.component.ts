@@ -44,7 +44,7 @@ export class MyApp {
             return Observable.of(null);//用户从未登录过
           }
           //登录过，使用数据库中的数据初始化应用
-          dbOp.executeSql(`select * from ${tableNames.eam_user} where userId=?`, [MroUtils.getLastLoginUserId()])
+          return dbOp.executeSql(`select * from ${tableNames.eam_user} where userId=?`, [MroUtils.getLastLoginUserId()])
             .map((res) => {
               let userState: UserState;
               if (res.rows.length > 0) {

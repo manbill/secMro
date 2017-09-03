@@ -5,7 +5,7 @@ interface SqlVersion {
 export const tableNames={
   eam_sql_version:'eam_sql_version',
   eam_user:'eam_user',
-  eam_sync_function:'eam_sync_function',
+  eam_sync_actions:'eam_sync_actions',
   eam_sync_file:'eam_sync_file',
   eam_sync_work_order:'eam_sync_work_order',
   eam_sync_dictionary_detail:'eam_sync_dictionary_detail'
@@ -21,10 +21,11 @@ export const SqlVersions: SqlVersion[] = [
         userId int not null,
         primary key(userId)
       )`,
-      `create table if not exists ${tableNames.eam_sync_function} (
-        syncFunctionName text,
+      //syncStatus 0代表失败，1代表成功
+      `create table if not exists ${tableNames.eam_sync_actions} (
+        syncAction text,
         lastSyncSuccessTime number,
-        syncStatus text
+        syncStatus number
       )`
     ]
   },
@@ -38,7 +39,7 @@ export const SqlVersions: SqlVersion[] = [
         paraType text,
         detailCode text,
         detailComment text,
-        activeFlag text,
+        activeFlag number,
         createBy int,
         createOn int,
         lastUpdBy int,

@@ -27,10 +27,14 @@ export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loadi
   )
   )
   interceptor.request().addInterceptor((data,method)=>{
+    // console.debug(data)
     const url:string = data[0];
     const reqOpts:RequestOptions=data[2];
-    if(url&&url.includes('/api')){
+    if(method.toLowerCase()==='post'&&url&&url.includes('/api')){
       data[2]=Object.assign({},reqOpts,MroUtils.generatePostReqArgs(store.getState().userState.currentUser.token));
+    };
+    if(method.toLowerCase()==='get'&&url&&url.includes('/api')){
+      data[1]=Object.assign({},reqOpts,MroUtils.generatePostReqArgs(store.getState().userState.currentUser.token));
     };
     const reqObj = {
       url:data[0],

@@ -14,6 +14,8 @@ export interface MroApiEntities{
   fetchProjectsApi:string;
   fetchCompaniesApi:string;
   fetchWarehouse:string;
+  fetchDictionaryApi:string;
+  getCurServerTimeApi:string;
 }
 @Injectable()
 export class MroApiProvider {
@@ -22,7 +24,9 @@ export class MroApiProvider {
     logoutApi:Apis.Api_logout,
     fetchCompaniesApi:"todo",
     fetchProjectsApi:Apis.Api_getUserProject,
-    fetchWarehouse:Apis.Api_getWarehouse
+    fetchWarehouse:Apis.Api_getWarehouse,
+    fetchDictionaryApi:Apis.Api_getDictionaryDetail,
+    getCurServerTimeApi:Apis.Api_getSystemTime
   }
   constructor() {
   }

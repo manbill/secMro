@@ -13,7 +13,7 @@ import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { AboutPage } from '../about/about';
 import { ContactPage } from '../contact/contact';
 import { HomePage } from '../home/home';
-import { Duration } from "moment";
+import { fetchDictionaryData } from "../../base-data/dictionary/dictionary.actions";
 @Component({
   templateUrl: 'tabs.html'
 })
@@ -24,15 +24,19 @@ export class TabsPage implements OnInit, OnDestroy {
   ngOnInit(): void {
     console.log("ngOnInit")
     // throw new Error("Method not implemented.");
+    this.store.dispatch(fetchDictionaryData());
   }
   unsubscribe: Unsubscribe;
-  tab1Root = HomePage;
-  tab2Root = AboutPage;
-  tab3Root = ContactPage;
+  homeRoot = HomePage;
+  aboutRoot = AboutPage;
+  contactRoot = ContactPage;
   constructor(private sqlite: DbOperationProvider, private navCtrl: NavController, @Inject(AppStore) private store: Store<AppState>) {
     console.log("TabsPage,constructor");
     this.unsubscribe = store.subscribe(() => {
-
+      // if(!store.getState().baseDataState.dictionaryState.isCompleted){
+      //   navCtrl.push(LoginPage);
+      //   this.unsubscribe();
+      // }
     })
   }
 }

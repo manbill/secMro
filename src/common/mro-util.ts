@@ -17,4 +17,13 @@ export class MroUtils {
    static getLastLoginUserId():number {
     return window.localStorage.getItem(USER_ID)?+window.localStorage.getItem(USER_ID):null;
   }
+  static changeDbRecord2Array(dbRes:any){
+    const res = [];
+    if(dbRes.rows&&dbRes.rows.length>0){
+      for(let i=0;i<dbRes.rows.length;i++){
+        res.push(dbRes.rows.item(i));
+      }
+    }
+    return res;
+  }
 }

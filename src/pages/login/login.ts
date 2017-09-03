@@ -63,11 +63,12 @@ export class LoginPage {
     this.unsubscription = this.store.subscribe(() => {
       //do nothing;
     });
+    //登录用户改变，或者是尚未选择项目
     if(this.store.getState().userState.currentUser&&
       this.store.getState().userState.currentUser.id!==MroUtils.getLastLoginUserId()
+    || !this.store.getState().userState.projectState.selectedProject
     ){
       console.log('重新选择项目')
-      //登录用户改变，需要重新选择项目
       this.navCtrl.push(SelectCompanyProjectPage);
       return ;
     }
