@@ -1,6 +1,7 @@
+import { MroError,MroErrorCode } from './mro-error-handler';
 import { Observable } from 'rxjs/Observable';
 import { HttpInterceptorService } from 'ng-http-interceptor';
-import { InjectionToken, Provider } from '@angular/core';
+import { InjectionToken, Provider,ErrorHandler } from '@angular/core';
 import { DbOperationProvider } from '../providers/db-operation/db-operation';
 import { EpicDependencies, RootReducer, AppState, RootEpics } from './app.reducer';
 import { compose, createStore, applyMiddleware, Store } from 'redux';
@@ -12,7 +13,7 @@ import { MroUtils } from '../common/mro-util';
 
 const composeEnhancer = window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
 export const AppStore = new InjectionToken("Mro.App.Store");
-export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loading: LoadingController,api:MroApiProvider,interceptor:HttpInterceptorService, alterCtrl:AlertController) {
+export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loading: LoadingController,api:MroApiProvider,interceptor:HttpInterceptorService, alterCtrl:AlertController,errorHandler:ErrorHandler) {
   const deps: EpicDependencies = {
     db: sqlite,
     http: http,
@@ -53,6 +54,11 @@ export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loadi
           responseDateTime:new Date(),
           response:r.json()
         });
+        if(r.json().retCode==='10008'){
+          let err= new MroError(MroErrorCode.token_invalid_error_code,'token失效，请重新登录',r.json().retInfo);
+          this.errorHandler.handleError(err);
+          throw("请重新登录")
+        }
         if(r.json().retCode!=='00000'){
           throw(r.json().retInfo||"网络请求失败!");
         }
@@ -64,6 +70,6 @@ export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loadi
 }
 export const MroAppStoreProvider: Provider = {
   provide: AppStore,
-  useFactory: (http, sqlite, loading,api,interceptor,alterCtrl) => createMroAppStore(http, sqlite, loading,api,interceptor, alterCtrl),
-  deps: [Http, DbOperationProvider, LoadingController,MroApiProvider,HttpInterceptorService,AlertController]
+  useFactory: (http, sqlite, loading,api,interceptor,alterCtrl,errorHandler) => createMroAppStore(http, sqlite, loading,api,interceptor, alterCtrl,errorHandler),
+  deps: [Http, DbOperationProvider, LoadingController,MroApiProvider,HttpInterceptorService,AlertController,ErrorHandler]
 }

@@ -1,6 +1,7 @@
+import { LoginPage } from './../pages/login/login';
 import { Action } from 'redux';
 import { ActionCreator } from 'redux';
-import { IonicErrorHandler, LoadingController } from "ionic-angular";
+import { IonicErrorHandler, LoadingController, App } from "ionic-angular";
 import { Inject } from "@angular/core";
 import { inspect } from "util";
 export class MroErrorHandler extends IonicErrorHandler {
@@ -12,6 +13,17 @@ export class MroErrorHandler extends IonicErrorHandler {
         case MroErrorCode.network_error_code: {
           alert("网络错误,原因：" + error.errorMessage);
           break;
+        }
+        case MroErrorCode.token_invalid_error_code:{
+          const loading = this.loading.create({
+            content:error.errorMessage,
+            duration:1000*60,
+            spinner: 'hide',
+            enableBackdropDismiss:true,
+            cssClass:'error'
+          });
+          loading.present();
+          return;
         }
       }
     } else {
@@ -39,6 +51,7 @@ export class MroError {
 }
 export enum MroErrorCode {
   network_error_code = 0x00001,//网络错误
+  token_invalid_error_code,
   planned_order_info_upload_error_code,//计划工单信息上传失败
   planned_order_db_insert_failed_error_code,//计划工单信息写入数据库失败
   planned_order_db_update_failed_error_code,//计划工单信息更新数据失败

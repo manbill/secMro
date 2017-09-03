@@ -18,7 +18,7 @@ export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store:
   const loading = deps.loading.create({
     content: '正在同步字典数据...'
   });
-  let serverTime = '';
+  let curServerTime = '';
   return action$.ofType(DictonaryActions.FETCH_DICTIONARY_DATA)
     .switchMap(() => {
       loading.present();
@@ -36,7 +36,7 @@ export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store:
       return deps.http.get(deps.mroApis.getCurServerTimeApi)
         .map(res => res['data'])
     }, (lastTime, serverTime) => {
-      serverTime = serverTime;
+      curServerTime = serverTime;
       return [lastTime, serverTime];
     })
     .switchMap(([lastTime, serverTime]) => {
@@ -83,7 +83,7 @@ export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store:
           sqls.push([insertSql, values]);
         }
       }
-      sqls.push([`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [serverTime, 1, DictonaryActions.FETCH_DICTIONARY_DATA]]);
+      sqls.push([`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [curServerTime, 1, DictonaryActions.FETCH_DICTIONARY_DATA]]);
       return deps.db.sqlBatch(sqls)
         .switchMap((newData) =>
           deps.db.executeSql(`select * from ${tableNames.eam_sync_dictionary_detail}`)

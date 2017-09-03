@@ -1,3 +1,4 @@
+import { BaseDataSyncActions } from './../base-data/base-data.actions';
 import { HomePage } from './../pages/home/home';
 import { TabsPage } from './../pages/tabs/tabs';
 import { Observable } from 'rxjs/Observable';
@@ -38,6 +39,18 @@ export class MyApp {
       let startTime = Date.now();
       dbOp
         .initSqlVersions()
+        .switchMap(()=>{
+          return dbOp.executeSql(`select * from ${tableNames.eam_sync_actions}`)
+          .map(res=>MroUtils.changeDbRecord2Array(res))
+        })
+        .switchMap(res=>{
+          const sqls = [];
+          if(res.length===0){
+            BaseDataSyncActions.map((action)=>sqls.push([`insert into ${tableNames.eam_sync_actions}(syncAction,lastSyncSuccessTime,syncStatus)values(?,?,?)`,[action,0,1]]))
+            return dbOp.sqlBatch(sqls);
+          }
+          return Observable.of(null);
+        })
         .switchMap(() => {
           if (!MroUtils.getLastLoginUserId()) {
             console.log("用户从未登录过")
