@@ -50,10 +50,10 @@ import { HttpInterceptorModule } from "ng-http-interceptor";
     StatusBar,
     SQLite,
     SplashScreen,
-    {provide: ErrorHandler, useClass: MroErrorHandler},
     DbOperationProvider,
     MroApiProvider,
     MroAppStoreProvider,
+    {provide: ErrorHandler, useClass: MroErrorHandler}
   ]
 })
 export class AppModule {}

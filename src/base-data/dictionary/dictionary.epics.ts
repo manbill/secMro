@@ -50,9 +50,6 @@ export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store:
         .map(dbRes => MroUtils.changeDbRecord2Array(dbRes));
     }, (res: MroResponse, dbRes) => ([res.data, dbRes]))
     .switchMap(([newData, oldRecords]) => {
-      if (newData.length === 0) {
-        return Observable.of(oldRecords);
-      }
       const updateSql = `update ${tableNames.eam_sync_dictionary_detail} set  detailName=?,dictionaryId=?,paraType=?,detailCode=?,detailComment=?,activeFlag=?,createBy=?,createOn=?,lastUpdBy=?,lastUpdOn=? where detailId=?`;
       const insertSql = `insert into ${tableNames.eam_sync_dictionary_detail}(detailName,dictionaryId,paraType,detailCode,detailComment,activeFlag,createBy,createOn,lastUpdBy,lastUpdOn,detailId)values(?,?,?,?,?,?,?,?,?,?,?)`;
       const sqls = [];
@@ -88,11 +85,12 @@ export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store:
         .switchMap((newData) =>
           deps.db.executeSql(`select * from ${tableNames.eam_sync_dictionary_detail}`)
             .map((res => MroUtils.changeDbRecord2Array(res))),
-        (newData, dbRecords) => ([newData, dbRecords]))
+        (newData, dbRecords) => ({newData, dbRecords}))
     })
     .do(() => loading.dismiss())
-    .map(([newData, dbRecords]) => DictonaryActions.fetchdictionarycompleted(newData.length > 0 ? newData : dbRecords))
+    .map(({newData, dbRecords}) => DictonaryActions.fetchdictionarycompleted(newData.length > 0 ? newData : dbRecords))
     .catch(e => {
+      console.error(e)
       loading.dismiss();
       let err = new MroError(MroErrorCode.fetch_dictionary_error_code, '同步字典数据失败', JSON.stringify(e));
       return Observable.of(generateMroError(err));
