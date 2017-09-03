@@ -3,7 +3,7 @@ import { MroAppStoreProvider } from './app.store';
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule } from 'ionic-angular';
-import { MroErrorHandler } from "./mro-error-handler";
+import { MroErrorHandler,MroErrorHandlerProvider } from "./mro-error-handler";
 import { MyApp } from './app.component';
 
 import { AboutPage } from '../pages/about/about';
@@ -47,13 +47,13 @@ import { HttpInterceptorModule } from "ng-http-interceptor";
     SelectCompanyProjectPage
   ],
   providers: [
+    MroErrorHandlerProvider,
     StatusBar,
     SQLite,
     SplashScreen,
     DbOperationProvider,
     MroApiProvider,
     MroAppStoreProvider,
-    {provide: ErrorHandler, useClass: MroErrorHandler}
   ]
 })
 export class AppModule {}

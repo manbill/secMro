@@ -2,7 +2,7 @@ import { LoginPage } from './../pages/login/login';
 import { Action } from 'redux';
 import { ActionCreator } from 'redux';
 import { IonicErrorHandler, LoadingController, App } from "ionic-angular";
-import { Inject } from "@angular/core";
+import { Inject,Provider } from "@angular/core";
 import { inspect } from "util";
 export class MroErrorHandler extends IonicErrorHandler {
   constructor(@Inject(LoadingController)private loading: LoadingController) { super() }
@@ -90,3 +90,5 @@ export function generateMroError(e:MroError):GenerateMroErrorAction{
     error:e
   }
 }
+export const MroErrorHandlerProvider:Provider=
+  { provide: errorHandled, useClass: MroErrorHandler }
