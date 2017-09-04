@@ -1,0 +1,37 @@
+export class Material {
+  materialId: number;
+  materialName: string;
+  unit: string;
+  materialSno: string;
+  materialType: string;
+  materialTypeText: string;
+  materialSuite: string;
+  machine_model: any;
+  materialFileid: number;
+  materialValue: string;
+  marterialExpiredate: number;
+  materialComment: string;
+  materialSupplier: string;
+  materialFileDetailDTO: any;
+  qrFileDetailDTO: any;
+  materialFilePath: string;
+  qrcodeFileid: number;
+  materialQrFilePath: string;
+  material_replace: string;
+  materialPicList: string[]
+  currPage: number;
+  pageSize: number;
+  comment: string;
+  materialVendor: string;
+  machineModel: string;
+  machineModelId: number;
+  materialReplace: string;
+  activeFlag: number;
+  filemappingIdList: number[];
+  createBy: string;
+  lastUpdBy: string;
+  lastUpdateDatetimeApi: number;
+  amount: number;
+  movingAveragePrice: number;
+  isReturnBadParts: string;
+}

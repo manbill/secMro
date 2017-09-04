@@ -4,8 +4,10 @@ import { combineReducers } from 'redux';
 
 import { DictionaryState, DictionaryReducer, DictionaryEpics } from './dictionary/dictionary.reducer';
 import { FormGroup } from '@angular/forms';
+import { MaterialState } from './material/material.reducer';
 export interface BaseDataState{
-  dictionaryState:DictionaryState
+  dictionaryState:DictionaryState,
+  materialState:MaterialState
 }
 export const BaseDataReducer=combineReducers({
   dictionaryState:DictionaryReducer
