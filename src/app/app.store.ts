@@ -57,7 +57,7 @@ export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loadi
         });
         if(r.json().retCode==='10008'){
           let err= new MroError(MroErrorCode.token_invalid_error_code,'token失效，请重新登录',r.json().retInfo);
-          this.errorHandler.handleError(err);
+          errorHandler.handleError(err);
           throw("请重新登录")
         }
         if(r.json().retCode!=='00000'){
