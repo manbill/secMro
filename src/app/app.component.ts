@@ -20,7 +20,7 @@ import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/of';
-import { LoginPage } from "../pages/login/login";
+import { LoginPage } from '../pages/login/login';
 import { MroErrorCode, MroError } from "./mro-error-handler";
 import { initUserState } from "../user/user.actions";
 
@@ -39,14 +39,14 @@ export class MyApp {
       let startTime = Date.now();
       dbOp
         .initSqlVersions()
-        .switchMap(()=>{
+        .switchMap(() => {
           return dbOp.executeSql(`select * from ${tableNames.eam_sync_actions}`)
-          .map(res=>MroUtils.changeDbRecord2Array(res))
+            .map(res => MroUtils.changeDbRecord2Array(res))
         })
-        .switchMap(res=>{
+        .switchMap(res => {
           const sqls = [];
-          if(res.length===0){
-            BaseDataSyncActions.map((action)=>sqls.push([`insert into ${tableNames.eam_sync_actions}(syncAction,lastSyncSuccessTime,syncStatus)values(?,?,?)`,[action,0,1]]))
+          if (res.length === 0) {
+            BaseDataSyncActions.map((action) => sqls.push([`insert into ${tableNames.eam_sync_actions}(syncAction,lastSyncSuccessTime,syncStatus)values(?,?,?)`, [action, 0, 1]]))
             return dbOp.sqlBatch(sqls);
           }
           return Observable.of(null);
@@ -86,6 +86,12 @@ export class MyApp {
             return;
           }
           this.nav.push(TabsPage);
+          const unSubscription = this.store.subscribe(() => {
+            if (!this.store.getState().userState.isTokenValid) {
+              this.nav.push(LoginPage);
+              unSubscription();
+            }
+          });
         },
         e => console.error(e),
         () => console.log("初始化数据库版本完成", Date.now() - startTime, '毫秒')

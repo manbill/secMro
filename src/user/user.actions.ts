@@ -5,6 +5,7 @@ import { User } from './user.modal';
 export const LOGIN_SUCCESS = 'login_success';
 export const INIT_USER_STATE = 'init_user_state';
 export const LOGIN_ACTION = 'login_action';
+export const TOKEN_INVALID='token_invalid';
 export const SET_USER_STATE_COMPLETE='set_user_state_complete';
 export interface UserLoginInfo {
   userName: string;
@@ -13,6 +14,11 @@ export interface UserLoginInfo {
 }
 export interface LoginAction extends Action {
   userInfo: UserLoginInfo
+}
+export function tokenInvalid():Action{
+  return {
+    type:TOKEN_INVALID
+  }
 }
 export function login(userInfo: UserLoginInfo): LoginAction {
   return {

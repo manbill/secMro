@@ -11,10 +11,11 @@ import { combineReducers } from 'redux';
 import { MroApiEntities } from '../providers/mro-api/mro-api';
 import { combineEpics } from 'redux-observable';
 import { HttpInterceptorService } from "ng-http-interceptor";
+import { ErrorHandler } from '@angular/core';
 export interface AppState{
   userState:UserState,
   baseDataState:BaseDataState,
-  warehouseState:WarehouseState
+  warehouseState:WarehouseState,
 }
 export interface EpicDependencies{
   http:Http;
@@ -22,6 +23,7 @@ export interface EpicDependencies{
   loading:LoadingController;
   mroApis:MroApiEntities;
   alterCtrl:AlertController,
+  errorHandler:ErrorHandler
 }
 export  const RootReducer=combineReducers({
   userState:UserRootReducer,

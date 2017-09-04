@@ -30,6 +30,8 @@ export class TabsPage implements OnInit, OnDestroy {
   homeRoot = HomePage;
   aboutRoot = AboutPage;
   contactRoot = ContactPage;
+  projectName:string;
+  companyName:string;
   constructor(private sqlite: DbOperationProvider, private navCtrl: NavController, @Inject(AppStore) private store: Store<AppState>) {
     console.log("TabsPage,constructor");
     this.unsubscribe = store.subscribe(() => {

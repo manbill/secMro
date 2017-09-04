@@ -11,6 +11,7 @@ export interface UserState{
   companyState:CompanyState;
   currentUser:User;
   lastLoginTime:number;
+  isTokenValid:boolean
 }
 export function UserReducer(state:User=null,action:Action):User{
   switch(action.type){
@@ -38,11 +39,25 @@ export function LastLoginTimeReducer(state:number=Date.now(),action:Action):numb
     }
   }
 }
+export const TokenReducer=(state:boolean=true,action:Action):boolean=>{
+  switch(action.type){
+    default:{
+      return state;
+    }
+    case UserActions.LOGIN_SUCCESS:{
+      return true;
+    }
+    case UserActions.TOKEN_INVALID:{
+      return false;
+    }
+  }
+}
 export const UserRootReducer=combineReducers({
   projectState:ProjectReducer,
   companyState:CompanyReducer,
   currentUser:UserReducer,
-  lastLoginTime:LastLoginTimeReducer
+  lastLoginTime:LastLoginTimeReducer,
+  isTokenValid:TokenReducer
 });
 export const RootUserEpics=combineEpics(loginEpic,RootProjectEpics,RootCompanyEpics,setUserStateEpic);
 

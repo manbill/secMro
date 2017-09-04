@@ -10,6 +10,7 @@ import { Http, RequestOptions } from '@angular/http';
 import { LoadingController, AlertController } from 'ionic-angular';
 import { MroApiProvider } from '../providers/mro-api/mro-api';
 import { MroUtils } from '../common/mro-util';
+import { tokenInvalid } from "../user/user.actions";
 
 const composeEnhancer = window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
 export const AppStore = new InjectionToken("Mro.App.Store");
@@ -21,6 +22,7 @@ export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loadi
     loading: loading,
     mroApis:api.mroApiEntities,
     alterCtrl:alterCtrl,
+    errorHandler:errorHandler
   };
   const store: Store<AppState> = createStore(RootReducer, composeEnhancer(
     applyMiddleware(
@@ -57,8 +59,9 @@ export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loadi
         });
         if(r.json().retCode==='10008'){
           let err= new MroError(MroErrorCode.token_invalid_error_code,'token失效，请重新登录',r.json().retInfo);
-          errorHandler.handleError(err);
-          throw("请重新登录")
+          // errorHandler.handleError(err);
+          store.dispatch(tokenInvalid());
+          throw(err);
         }
         if(r.json().retCode!=='00000'){
           throw(r.json().retInfo||"网络请求失败!");
