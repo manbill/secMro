@@ -8,3 +8,4 @@
  export const Api_getWarehouse = baseUrl + "/api/common/getRepertory.api";
  export const Api_getDictionaryDetail = baseUrl + "/api/common/getDictionaryDetail.api";
  export const Api_getSystemTime = baseUrl + "/api/common/getSystemTime.api";
+ export const Api_getMaterial = baseUrl + "/api/common/getMaterial.api";

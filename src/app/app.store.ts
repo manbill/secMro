@@ -15,7 +15,6 @@ import { tokenInvalid } from "../user/user.actions";
 const composeEnhancer = window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
 export const AppStore = new InjectionToken("Mro.App.Store");
 export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loading: LoadingController,api:MroApiProvider,interceptor:HttpInterceptorService, alterCtrl:AlertController,errorHandler:ErrorHandler) {
-  console.log(errorHandler)
   const deps: EpicDependencies = {
     db: sqlite,
     http: http,

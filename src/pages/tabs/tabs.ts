@@ -14,6 +14,7 @@ import { AboutPage } from '../about/about';
 import { ContactPage } from '../contact/contact';
 import { HomePage } from '../home/home';
 import { fetchDictionaryData } from "../../base-data/dictionary/dictionary.actions";
+import { fetchMaterialData } from '../../base-data/material/material.actions';
 @Component({
   templateUrl: 'tabs.html'
 })
@@ -25,6 +26,7 @@ export class TabsPage implements OnInit, OnDestroy {
     console.log("ngOnInit")
     // throw new Error("Method not implemented.");
     this.store.dispatch(fetchDictionaryData());
+    this.store.dispatch(fetchMaterialData())
   }
   unsubscribe: Unsubscribe;
   homeRoot = HomePage;

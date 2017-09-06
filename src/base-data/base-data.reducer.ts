@@ -4,12 +4,14 @@ import { combineReducers } from 'redux';
 
 import { DictionaryState, DictionaryReducer, DictionaryEpics } from './dictionary/dictionary.reducer';
 import { FormGroup } from '@angular/forms';
-import { MaterialState } from './material/material.reducer';
+import { MaterialState, MaterialReducer } from './material/material.reducer';
+import { MaterialEpics } from './material/material.epics';
 export interface BaseDataState{
   dictionaryState:DictionaryState,
   materialState:MaterialState
 }
 export const BaseDataReducer=combineReducers({
-  dictionaryState:DictionaryReducer
+  dictionaryState:DictionaryReducer,
+  materialState:MaterialReducer
 })
-export const RootBaseDataEpics=combineEpics(DictionaryEpics)
+export const RootBaseDataEpics=combineEpics(DictionaryEpics,MaterialEpics)
