@@ -46,7 +46,7 @@ export class MyApp {
         .switchMap(res => {
           const sqls = [];
           if (res.length === 0) {
-            BaseDataSyncActions.map((action) => sqls.push([`insert into ${tableNames.eam_sync_actions}(syncAction,lastSyncSuccessTime,syncStatus)values(?,?,?)`, [action, 0, 1]]))
+            BaseDataSyncActions.map((action) => sqls.push([`insert into ${tableNames.eam_sync_actions}(syncAction,lastSyncSuccessTime,syncStatus)values(?,?,?)`, [action, 0, 0]]))
             return dbOp.sqlBatch(sqls);
           }
           return Observable.of(null);
@@ -77,7 +77,14 @@ export class MyApp {
             isLogin = true;
           }
           // ☐ 判断一下是否完成了基础数据下载、或需要重新登登
-          return Observable.of(isLogin);
+          return dbOp.executeSql(`select * from ${tableNames.eam_sync_actions} where syncStatus=?`, [1])
+            .map(res => {
+              const len = MroUtils.changeDbRecord2Array(res);
+              if (len.length > 0) {
+                isLogin = true;
+              }
+              return isLogin;
+            });
         })
         .subscribe(
         (isLogin) => {

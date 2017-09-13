@@ -8,7 +8,8 @@ export const tableNames={
   eam_sync_actions:'eam_sync_actions',
   eam_sync_file:'eam_sync_file',
   eam_sync_work_order:'eam_sync_work_order',
-  eam_sync_dictionary_detail:'eam_sync_dictionary_detail'
+  eam_sync_dictionary_detail:'eam_sync_dictionary_detail',
+  eam_sync_material:'eam_sync_material'
 }
 
 export const SqlVersions: SqlVersion[] = [
@@ -85,6 +86,40 @@ export const SqlVersions: SqlVersion[] = [
         json text,
         PRIMARY KEY(workorderId)
       )`
+    ]
+  },
+  {
+    sqlVersion:4,
+    sqlStatements:[
+      `create table if not exists ${tableNames.eam_sync_material}(
+        materialId int not null,
+        materialName text,
+        unit text,
+        materialSno text,
+        materialType text,
+        materialTypeText text,
+        materialSuite text,
+        machine_model text,
+        materialFileid int,
+        materialValue text,
+        marterialExpiredate int,
+        materialComment text,
+        materialSupplier text,
+        materialFilePath text,
+        qrcodeFileid int,
+        materialQrFilePath text,
+        material_replace text,
+        comment text,
+        materialVendor text,
+        machineModel text,
+        machineModelId int,
+        materialReplace text,
+        activeFlag int,
+        sapInventoryFlag int,
+        json text,
+        primary key(materialId)
+      )
+      `
     ]
   }
 ]
