@@ -1,3 +1,4 @@
+import { tableNames } from './../../providers/db-operation/mro.tables';
 import { ActionsObservable, combineEpics } from 'redux-observable';
 import { AppState, EpicDependencies } from '../../app/app.reducer';
 import { Action, Store } from 'redux';
@@ -6,7 +7,6 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
-import { tableNames } from "../../providers/db-operation/mro.tables";
 import { generateMroError, MroError, MroErrorCode } from '../../app/mro-error-handler';
 import { MroUtils } from '../../common/mro-util';
 import { MroResponse } from '../../common/mro-response';
@@ -26,41 +26,54 @@ import 'rxjs/add/operator/startWith';
 
 
 export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
+  const loading = deps.loading.create({
+    content: '下载物料...'
+  });
+  let curServerTime = Date.now();
   return action$.ofType(MaterialActions.FETCH_MATERIAL_DATA)
     .switchMap(() => {
-      const loading = deps.loading.create({
-        content: '下载物料...'
-      });
       loading.present();
       return deps.db.executeSql(`select * from ${tableNames.eam_sync_actions} where syncAction=?`, [MaterialActions.FETCH_MATERIAL_DATA])
-        .map(res => MroUtils.changeDbRecord2Array(res)['lastSyncSuccessTime'] || 0)
-        .do(() => loading.dismiss());
+        .do(res => console.log(res))
+        .map(res => {
+          const result = MroUtils.changeDbRecord2Array(res);
+          if (result.length > 0) {
+            return (result[0]['lastSyncSuccessTime'] || 0)
+          } else {
+            return 0;
+          }
+        })
+      // .do(() => loading.dismiss());
     })
     .do(res => { console.log(res) })
     .switchMap(lastSyncTime => {
-      const loading = deps.loading.create({
-        content: '获取服务器时间'
-      });
+      // const loading = deps.loading.create({
+      //   content: '获取服务器时间'
+      // });
+      loading.setContent('获取服务器时间...');
       loading.present();
-      return deps.http.get(deps.mroApis.getCurServerTimeApi).map((res: MroResponse) => res.data).do(() => loading.dismiss());
+      return deps.http.get(deps.mroApis.getCurServerTimeApi).map((res: MroResponse) => res.data)
     }, (lastSyncTime, serverTime) => ({ lastSyncTime, serverTime }))
     .switchMap(({ lastSyncTime, serverTime }) => {
-      console.log({ lastSyncTime, serverTime });
+      curServerTime = serverTime;
       const params = {
         startDate: lastSyncTime,
         endDate: serverTime,
         page: 1
       }
       const repeat$ = new Subject();
-      const bufferCount = 1;//批量操作,这里是 10*1000
+      const bufferCount = 10;//批量操作,这里是 10*1000
       const maxRetryCount = 3;
       const retryIntervalTime = 2000;//每2秒尝试重新获取物料信息
-      const loading = deps.loading.create({
-        content: '获取服务器时间'
-      });
-      loading.present();
+      // const loading = deps.loading.create({
+      //   content: '网络获取物料数据...'
+      // });
+      // loading.present();
       return Observable.empty().startWith('getMaterials')
-        .do(() => loading.setContent("正在下载物料..."))
+        .do(() => {
+          loading.setContent('获取服务器时间...');
+          loading.present();
+        })
         .switchMap(() => deps.http.post(deps.mroApis.fetchMaterialApi, params))
         .repeatWhen(() => repeat$.asObservable())
         .retryWhen((err$) => Observable
@@ -68,7 +81,6 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
           .zip(err$, (i, err) => ({ i, err }))
           .mergeMap(({ i, err }) => {
             if (i === maxRetryCount - 1) {
-              loading.dismiss();
               return Observable.throw(err);
             }
             return Observable.timer(i * retryIntervalTime);
@@ -90,11 +102,11 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
         .filter(values => values.length > 0)
         .bufferCount(bufferCount)
         .do(values => console.log(values))
-        .mergeMap((values) => {
+        .switchMap((values) => {
           const sqls = [];
           const materials = values.reduce((arr, item) => arr.concat(item), []);
-          console.log('materials', materials);
-          sqls.push(`delete from  ${tableNames.eam_sync_material} where materialId in ${materials.map(m => m.materialId)+""}`);
+          console.log('materials', materials.length);
+          sqls.push(`delete from  ${tableNames.eam_sync_material} where materialId in (${materials.map(m => m.materialId)})`);
           const insertSql = `insert into ${tableNames.eam_sync_material}(
             materialId,
             materialName,
@@ -151,18 +163,19 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
             vals.push(JSON.stringify(material));
             sqls.push([insertSql, vals]);
           });
-          loading.setContent("正在缓存物料信息...");
-          console.log(sqls)
+          loading.setContent('正在缓存物料信息...');
+          loading.present();
           return deps.db.sqlBatch(sqls);
         })
-        .do(() => loading.dismiss())
     })
+    .switchMap(() => deps.db.executeSql(`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [curServerTime, 1, MaterialActions.FETCH_MATERIAL_DATA]))
     .switchMap(() => {
       const pagination = 10;
       return deps.db.executeSql(`select * from ${tableNames.eam_sync_material} limit 0,${pagination}`)
         .map(res => MroUtils.changeDbRecord2Array(res))
     })
     .map(materials => MaterialActions.fetchMaterialDataCompleted(materials))
+    .do(() => loading.dismissAll())
     .catch(e => {
       console.error(e);
       let err = new MroError(MroErrorCode.fetch_dictionary_error_code, '获取物料信息失败', JSON.stringify(e));

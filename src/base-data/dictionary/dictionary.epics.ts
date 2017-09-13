@@ -64,9 +64,9 @@ export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store:
         values.push(dict.detailComment);
         values.push(dict.activeFlag);
         values.push(dict.createBy);
-        values.push(dict.createOn);
+        values.push(dict.createOn?new Date(dict.createOn).getTime():dict.createOn);
         values.push(dict.lastUpdBy);
-        values.push(dict.lastUpdOn);
+        values.push(dict.lastUpdOn?new Date(dict.lastUpdOn).getTime():dict.lastUpdOn);
         values.push(dict.detailId);
         for (let j = 0; j < oldRecords.length; j++) {
           let old: Dictionary = oldRecords[j];

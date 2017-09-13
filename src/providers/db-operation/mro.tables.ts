@@ -44,7 +44,7 @@ export const SqlVersions: SqlVersion[] = [
         createBy int,
         createOn int,
         lastUpdBy int,
-        lastUpdOn text,
+        lastUpdOn int,
         PRIMARY KEY(detailId)
       )`
     ]

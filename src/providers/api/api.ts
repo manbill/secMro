@@ -1,5 +1,5 @@
-//  const baseUrl = 'https://mroqas.shanghai-electric.com/eam-web/EamApi';
-  const baseUrl = 'http://10.54.134.64:8080/EamApi';                       
+ const baseUrl = 'https://mroqas.shanghai-electric.com/eam-web/EamApi';
+  // const baseUrl = 'http://10.54.134.64:8080/EamApi';
  export const Api_login= baseUrl+ "/common/user/login.api";
  export const Api_getUserProject = baseUrl + "/api/user/getUserProject.api"
  export const Api_getUpgradeVersionInfo=baseUrl+"/common/getUpgradeVersionInfo.api";
