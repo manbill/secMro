@@ -9,7 +9,8 @@ export const tableNames={
   eam_sync_file:'eam_sync_file',
   eam_sync_work_order:'eam_sync_work_order',
   eam_sync_dictionary_detail:'eam_sync_dictionary_detail',
-  eam_sync_material:'eam_sync_material'
+  eam_sync_material:'eam_sync_material',
+  eam_sync_base_data_state:'eam_sync_base_data_state'
 }
 
 export const SqlVersions: SqlVersion[] = [
@@ -120,6 +121,15 @@ export const SqlVersions: SqlVersion[] = [
         primary key(materialId)
       )
       `
+    ]
+  },
+  {
+    sqlVersion:5,
+    sqlStatements:[
+      `create table if not exists ${tableNames.eam_sync_base_data_state}(
+        type text,
+        stateJson text
+      )`
     ]
   }
 ]

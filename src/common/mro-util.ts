@@ -4,6 +4,7 @@ import { RequestOptions } from '@angular/http';
 import { RequestOptionsArgs } from '@angular/http';
 import { Loading } from "ionic-angular";
 import { not, isEmpty, compose } from "ramda";
+import { BaseDataSyncActions } from '../base-data/base-data.actions';
 const USER_ID = 'user_id';
 export class MroUtils {
   static PAGINATION = 10;//列表每次显示的条目数量
@@ -14,6 +15,16 @@ export class MroUtils {
     return reqOpt;
   }
   static isNotEmpty = compose(not, isEmpty);
+  static setBaseDataSyncStatus(action: string) {
+    return window.localStorage.setItem(action, '1');
+  }
+  static getBaseDataSyncActionStatus(action:string){
+    const act = BaseDataSyncActions.find((a)=>a===action);
+    if(!act){
+      return false;
+    }
+    return window.localStorage.getItem(act)==='1';
+  }
   static setLoginUserId(id: string | number) {
     return window.localStorage.setItem(USER_ID, id + "");
   }

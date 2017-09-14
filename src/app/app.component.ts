@@ -1,4 +1,4 @@
-import { BaseDataSyncActions } from './../base-data/base-data.actions';
+import { BaseDataSyncActions ,BaseDataStateTypes} from './../base-data/base-data.actions';
 import { HomePage } from './../pages/home/home';
 import { TabsPage } from './../pages/tabs/tabs';
 import { Observable } from 'rxjs/Observable';
@@ -46,7 +46,11 @@ export class MyApp {
         .switchMap(res => {
           const sqls = [];
           if (res.length === 0) {
-            BaseDataSyncActions.map((action) => sqls.push([`insert into ${tableNames.eam_sync_actions}(syncAction,lastSyncSuccessTime,syncStatus)values(?,?,?)`, [action, 0, 0]]))
+            BaseDataSyncActions.map((action) => sqls.push([`insert into ${tableNames.eam_sync_actions}(syncAction,lastSyncSuccessTime,syncStatus)values(?,?,?)`, [action, 0, 0]]));
+            Object.keys(BaseDataStateTypes).map((type)=>sqls.push([`insert into ${tableNames.eam_sync_base_data_state}(type,stateJson)values(?,?)`,[
+              BaseDataStateTypes[type],
+              null
+            ]]));
             return dbOp.sqlBatch(sqls);
           }
           return Observable.of(null);

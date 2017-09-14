@@ -1,12 +1,10 @@
-import { InitUserStateAction,initUserState } from './../../user/user.actions';
+import { InitUserStateAction, initUserState } from './../../user/user.actions';
 import { LoginPage } from './../login/login';
 import { MroUtils } from './../../common/mro-util';
-import { tableNames } from './../../providers/db-operation/mro.tables';
-import { DbOperationProvider } from './../../providers/db-operation/db-operation';
 import { UserState } from './../../user/user.reducer';
 import { NavController, NavParams } from 'ionic-angular';
 import { AppStore } from './../../app/app.store';
-import { Store, Unsubscribe } from 'redux';
+import { Store, Unsubscribe, Action } from 'redux';
 import { AppState } from './../../app/app.reducer';
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 
@@ -16,6 +14,8 @@ import { HomePage } from '../home/home';
 import { fetchDictionaryData } from "../../base-data/dictionary/dictionary.actions";
 import { fetchMaterialData } from '../../base-data/material/material.actions';
 import { eamSyncActionEntities } from '../../app/app.actions';
+import { DbOperationProvider } from '../../providers/db-operation/db-operation';
+import { tableNames } from '../../providers/db-operation/mro.tables';
 @Component({
   templateUrl: 'tabs.html'
 })
@@ -25,23 +25,24 @@ export class TabsPage implements OnInit, OnDestroy {
   }
   ngOnInit(): void {
     console.log("ngOnInit")
-    // throw new Error("Method not implemented.");
-    this.sqlite.executeSql(`select * from ${tableNames.eam_sync_actions} where syncStatus=?`,[0])
-    .map(res=>MroUtils.changeDbRecord2Array(res))
-    .map((actions)=>{
-      actions.map((action)=>{
-        this.store.dispatch(eamSyncActionEntities[action]);
+    //执行未完成的同步函数
+    this.sqlite.executeSql(`select * from ${tableNames.eam_sync_actions} where syncStatus=?`, [0])
+      .map(res => MroUtils.changeDbRecord2Array(res))
+      .do((actions) => console.log('actions: ', actions))
+      .map((actions) => {
+        actions.map((action) => {
+          this.store.dispatch({ type: eamSyncActionEntities[action['syncAction']] });
+        });
       })
-    })
-    .subscribe();
+      .subscribe();
   }
   unsubscribe: Unsubscribe;
   homeRoot = HomePage;
   aboutRoot = AboutPage;
   contactRoot = ContactPage;
-  projectName:string;
-  companyName:string;
-  constructor(private sqlite: DbOperationProvider, private navCtrl: NavController, @Inject(AppStore) private store: Store<AppState>) {
+  projectName: string;
+  companyName: string;
+  constructor(private navCtrl: NavController, private sqlite: DbOperationProvider, @Inject(AppStore) private store: Store<AppState>) {
     console.log("TabsPage,constructor");
   }
 }

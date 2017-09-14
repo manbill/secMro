@@ -8,7 +8,7 @@ export function initAppState(): Action {
     type: INIT_APP_STATE
   }
 }
-export const eamSyncActionEntities=BaseDataSyncActions.reduce((entities,action)=>{
-  entities[action]=action;
+export const eamSyncActionEntities = BaseDataSyncActions.reduce((entities, action) => {
+  entities[action] = action;
   return entities;
-},{});
+}, {});

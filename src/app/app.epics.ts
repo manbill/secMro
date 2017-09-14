@@ -5,6 +5,7 @@ import { Store, Action } from "redux";
 import 'rxjs/add/observable/of';
 import * as HandleErrorActions from "./mro-error-handler";
 import { GENERATE_MRO_ERROR, GenerateMroErrorAction, MroErrorCode } from './mro-error-handler';
+import { AppStore } from './app.store';
 export const errorHandleEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(GENERATE_MRO_ERROR)
     .switchMap((action: HandleErrorActions.GenerateMroErrorAction) => {

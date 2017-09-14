@@ -26,6 +26,8 @@ import 'rxjs/add/operator/takeLast';
 import * as R from "ramda";
 import { Loading } from 'ionic-angular';
 import { loadMoreMaterialsComplete, loadMoreMaterials } from './material.actions';
+import { MaterialState } from './material.reducer';
+import { BaseDataStateTypes } from '../base-data.actions';
 
 
 
@@ -165,7 +167,16 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
         .takeLast(1)
     })
     .do(() => console.log("完成所有物料缓存操作"))
-    .switchMap(() => deps.db.executeSql(`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [curServerTime, 1, MaterialActions.FETCH_MATERIAL_DATA]))
+    .switchMap(() => {
+      const materialState: MaterialState = {
+        ids: [],
+        isCompleted: true,
+        materialEntities: {}
+      }
+      const sqls = [[`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [curServerTime, 1, MaterialActions.FETCH_MATERIAL_DATA]]];
+      sqls.push([`update ${tableNames.eam_sync_base_data_state} set stateJson=? where type=?`, [JSON.stringify(materialState), BaseDataStateTypes.materials_state]])
+      return deps.db.sqlBatch(sqls);
+    })
     .mapTo(MaterialActions.fetchMaterialDataCompleted())
     .catch(e => {
       console.error(e);
@@ -198,4 +209,4 @@ export const loadMoreMaterialsEpic = (action$: ActionsObservable<Action>, store:
     })
     .map((materials) => MaterialActions.loadMoreMaterialsComplete(materials));
 }
-export const MaterialEpics = combineEpics(fetchMaterialsEpic);
+export const MaterialEpics = combineEpics(fetchMaterialsEpic, doRefreshMaterialDataEpic, loadMoreMaterialsEpic);

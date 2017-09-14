@@ -14,6 +14,8 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
 
 import { Action, Store } from "redux";
+import { DictionaryState } from './dictionary.reducer';
+import { BaseDataStateTypes } from '../base-data.actions';
 export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   const loading = deps.loading.create({
     content: '正在同步字典数据...'
@@ -64,9 +66,9 @@ export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store:
         values.push(dict.detailComment);
         values.push(dict.activeFlag);
         values.push(dict.createBy);
-        values.push(dict.createOn?new Date(dict.createOn).getTime():dict.createOn);
+        values.push(dict.createOn ? new Date(dict.createOn).getTime() : dict.createOn);
         values.push(dict.lastUpdBy);
-        values.push(dict.lastUpdOn?new Date(dict.lastUpdOn).getTime():dict.lastUpdOn);
+        values.push(dict.lastUpdOn ? new Date(dict.lastUpdOn).getTime() : dict.lastUpdOn);
         values.push(dict.detailId);
         for (let j = 0; j < oldRecords.length; j++) {
           let old: Dictionary = oldRecords[j];
@@ -85,10 +87,24 @@ export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store:
         .switchMap((newData) =>
           deps.db.executeSql(`select * from ${tableNames.eam_sync_dictionary_detail}`)
             .map((res => MroUtils.changeDbRecord2Array(res))),
-        (newData, dbRecords) => ({newData, dbRecords}))
+        (newData, dbRecords) => ({ newData, dbRecords }))
+    })
+    .do(({ newData, dbRecords })=>console.log('newData',newData,"dbRecords",dbRecords))
+    .switchMap(({ newData, dbRecords }) => {
+      const dicts: Dictionary[] = newData || dbRecords;
+      const dictSatate: DictionaryState = {
+        detailIds: dicts.map(dict => dict.detailId),
+        isCompleted: true,
+        dictionaryEntities: dicts.reduce((entities, dict) => {
+          entities[dict.detailId] = dict;
+          return entities;
+        }, {})
+      }
+      return deps.db.executeSql(`update ${tableNames.eam_sync_base_data_state} set stateJson=? where type=?`, [JSON.stringify(dictSatate), BaseDataStateTypes.dictionary_state])
+        .map(() => ({ newData, dbRecords }))
     })
     .do(() => loading.dismiss())
-    .map(({newData, dbRecords}) => DictonaryActions.fetchdictionarycompleted(newData.length > 0 ? newData : dbRecords))
+    .map(({ newData, dbRecords }) => DictonaryActions.fetchdictionarycompleted(newData.length > 0 ? newData : dbRecords))
     .catch(e => {
       console.error(e)
       loading.dismiss();
