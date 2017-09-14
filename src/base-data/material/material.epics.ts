@@ -22,19 +22,19 @@ import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/scan';
 import 'rxjs/add/operator/startWith';
+import 'rxjs/add/operator/takeLast';
+import * as R from "ramda";
+import { Loading } from 'ionic-angular';
+import { loadMoreMaterialsComplete, loadMoreMaterials } from './material.actions';
 
 
 
 export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
-  const loading = deps.loading.create({
-    content: '下载物料...'
-  });
   let curServerTime = Date.now();
+  const pagination = deps.pagination;//物料列表，每次获取的数量
   return action$.ofType(MaterialActions.FETCH_MATERIAL_DATA)
     .switchMap(() => {
-      loading.present();
       return deps.db.executeSql(`select * from ${tableNames.eam_sync_actions} where syncAction=?`, [MaterialActions.FETCH_MATERIAL_DATA])
-        .do(res => console.log(res))
         .map(res => {
           const result = MroUtils.changeDbRecord2Array(res);
           if (result.length > 0) {
@@ -43,37 +43,29 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
             return 0;
           }
         })
-      // .do(() => loading.dismiss());
     })
     .do(res => { console.log(res) })
+    .map(time => 0)
     .switchMap(lastSyncTime => {
-      // const loading = deps.loading.create({
-      //   content: '获取服务器时间'
-      // });
+      const loading = deps.loading.create();
       loading.setContent('获取服务器时间...');
       loading.present();
       return deps.http.get(deps.mroApis.getCurServerTimeApi).map((res: MroResponse) => res.data)
+        .do(() => loading.dismiss())
     }, (lastSyncTime, serverTime) => ({ lastSyncTime, serverTime }))
     .switchMap(({ lastSyncTime, serverTime }) => {
       curServerTime = serverTime;
       const params = {
         startDate: lastSyncTime,
         endDate: serverTime,
-        page: 1
+        page: 33
       }
       const repeat$ = new Subject();
-      const bufferCount = 10;//批量操作,这里是 10*1000
+      const bufferCount = 1;//批量操作,这里是1000的倍数，后台每次返回1000条物料
       const maxRetryCount = 3;
       const retryIntervalTime = 2000;//每2秒尝试重新获取物料信息
-      // const loading = deps.loading.create({
-      //   content: '网络获取物料数据...'
-      // });
-      // loading.present();
       return Observable.empty().startWith('getMaterials')
-        .do(() => {
-          loading.setContent('获取服务器时间...');
-          loading.present();
-        })
+        .do(() => console.log('物料下载参数', params))
         .switchMap(() => deps.http.post(deps.mroApis.fetchMaterialApi, params))
         .repeatWhen(() => repeat$.asObservable())
         .retryWhen((err$) => Observable
@@ -89,7 +81,9 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
         .map((res: MroResponse) => {
           if (res.data && res.data.length > 0) {
             params.page++;
-            setTimeout(() => repeat$.next(), 0);
+            setTimeout(() => {
+              repeat$.next()
+            }, 0);
           } else {
             if (!res.data) {
               repeat$.error(res.retInfo);
@@ -102,7 +96,7 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
         .filter(values => values.length > 0)
         .bufferCount(bufferCount)
         .do(values => console.log(values))
-        .switchMap((values) => {
+        .mergeMap((values) => {
           const sqls = [];
           const materials = values.reduce((arr, item) => arr.concat(item), []);
           console.log('materials', materials.length);
@@ -163,23 +157,45 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
             vals.push(JSON.stringify(material));
             sqls.push([insertSql, vals]);
           });
-          loading.setContent('正在缓存物料信息...');
-          loading.present();
-          return deps.db.sqlBatch(sqls);
+          return deps.db.sqlBatch(sqls)
+            .do(() => {
+              console.log("完成一次物料批量更新数据库操作");
+            })
         })
+        .takeLast(1)
     })
+    .do(() => console.log("完成所有物料缓存操作"))
     .switchMap(() => deps.db.executeSql(`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [curServerTime, 1, MaterialActions.FETCH_MATERIAL_DATA]))
-    .switchMap(() => {
-      const pagination = 10;
-      return deps.db.executeSql(`select * from ${tableNames.eam_sync_material} limit 0,${pagination}`)
-        .map(res => MroUtils.changeDbRecord2Array(res))
-    })
-    .map(materials => MaterialActions.fetchMaterialDataCompleted(materials))
-    .do(() => loading.dismissAll())
+    .mapTo(MaterialActions.fetchMaterialDataCompleted())
     .catch(e => {
       console.error(e);
       let err = new MroError(MroErrorCode.fetch_dictionary_error_code, '获取物料信息失败', JSON.stringify(e));
       return Observable.of(generateMroError(err));
     })
+}
+export const doRefreshMaterialDataEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
+  return action$.ofType(MaterialActions.DO_REFRESH_MATERIALS)
+    .mapTo(MaterialActions.fetchMaterialData())
+}
+export const loadMoreMaterialsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
+  return action$.ofType(MaterialActions.LOAD_MORE_MATERIALS)
+    .switchMap((action) => {
+      const searchParams = (<MaterialActions.LoadMoreMaterialsAction>action).searParams;
+      const skipRecords = deps.pagination * (searchParams.pageNumber - 1);
+      let where = '';
+      const values = [];
+      if (MroUtils.isNotEmpty(searchParams.params.materialSno)) {
+        where += ' and materialSno like ? ';
+        values.push(`%${searchParams.params.materialSno}%`);
+      }
+      if (MroUtils.isNotEmpty(searchParams.params.materialName)) {
+        where += ` and materialName like ? `;
+        values.push(`%${searchParams.params.materialName}%`);
+      }
+      values.push(skipRecords);
+      return deps.db.executeSql(`select * from ${tableNames.eam_sync_material} where 1=1 ${where} limit ?,${deps.pagination}`, values)
+        .map(res => MroUtils.changeDbRecord2Array(res))
+    })
+    .map((materials) => MaterialActions.loadMoreMaterialsComplete(materials));
 }
 export const MaterialEpics = combineEpics(fetchMaterialsEpic);

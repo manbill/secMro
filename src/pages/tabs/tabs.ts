@@ -15,6 +15,7 @@ import { ContactPage } from '../contact/contact';
 import { HomePage } from '../home/home';
 import { fetchDictionaryData } from "../../base-data/dictionary/dictionary.actions";
 import { fetchMaterialData } from '../../base-data/material/material.actions';
+import { eamSyncActionEntities } from '../../app/app.actions';
 @Component({
   templateUrl: 'tabs.html'
 })
@@ -25,8 +26,14 @@ export class TabsPage implements OnInit, OnDestroy {
   ngOnInit(): void {
     console.log("ngOnInit")
     // throw new Error("Method not implemented.");
-    this.store.dispatch(fetchDictionaryData());
-    this.store.dispatch(fetchMaterialData())
+    this.sqlite.executeSql(`select * from ${tableNames.eam_sync_actions} where syncStatus=?`,[0])
+    .map(res=>MroUtils.changeDbRecord2Array(res))
+    .map((actions)=>{
+      actions.map((action)=>{
+        this.store.dispatch(eamSyncActionEntities[action]);
+      })
+    })
+    .subscribe();
   }
   unsubscribe: Unsubscribe;
   homeRoot = HomePage;
@@ -36,11 +43,5 @@ export class TabsPage implements OnInit, OnDestroy {
   companyName:string;
   constructor(private sqlite: DbOperationProvider, private navCtrl: NavController, @Inject(AppStore) private store: Store<AppState>) {
     console.log("TabsPage,constructor");
-    this.unsubscribe = store.subscribe(() => {
-      // if(!store.getState().baseDataState.dictionaryState.isCompleted){
-      //   navCtrl.push(LoginPage);
-      //   this.unsubscribe();
-      // }
-    })
   }
 }

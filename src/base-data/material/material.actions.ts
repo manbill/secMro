@@ -1,18 +1,44 @@
 import { Action } from 'redux';
 import { Material } from './material.modal';
-export const FETCH_MATERIAL_DATA='fetch_material_data';
-export const FETCH_MATERIAL_DATA_COMPLETED='fetch_material_data_completed';
-export function fetchMaterialData():Action{
+import { BaseSearchParams } from '../../common/mro.search-params.modal';
+export const FETCH_MATERIAL_DATA = 'fetch_material_data';
+export const FETCH_MATERIAL_DATA_COMPLETED = 'fetch_material_data_completed';
+export const DO_REFRESH_MATERIALS = 'do_refresh_materials';
+export const LOAD_MORE_MATERIALS = 'load_more_materials';
+export const LOAD_MORE_MATERIALS_COMPLETE = 'load_more_materials_complete';
+export function fetchMaterialData(): Action {
   return {
-    type:FETCH_MATERIAL_DATA
+    type: FETCH_MATERIAL_DATA
   }
 }
-export function fetchMaterialDataCompleted( materials:Material[]):FetchMaterialDataCompletedAction{
+export function fetchMaterialDataCompleted(): Action {
   return {
-    type:FETCH_MATERIAL_DATA_COMPLETED,
-    materials:materials
+    type: FETCH_MATERIAL_DATA_COMPLETED
   }
 }
-export interface FetchMaterialDataCompletedAction extends Action{
-  materials:Material[];
+export function loadMoreMaterials(searParams?: MaterialSearchParams): LoadMoreMaterialsAction {
+  return {
+    type: LOAD_MORE_MATERIALS,
+    searParams: searParams
+  }
+}
+export function loadMoreMaterialsComplete(materials: Material[]): LoadMoreMaterialsCompleteAction {
+  return {
+    type: LOAD_MORE_MATERIALS_COMPLETE,
+    materials: materials
+  }
+}
+export function doRefreshMaterials(): Action {
+  return {
+    type: DO_REFRESH_MATERIALS
+  }
+}
+export interface LoadMoreMaterialsAction extends Action {
+  searParams: MaterialSearchParams
+}
+export interface LoadMoreMaterialsCompleteAction extends Action {
+  materials: Material[];
+}
+export interface MaterialSearchParams extends BaseSearchParams {
+  params?: Material
 }

@@ -17,6 +17,7 @@ export interface MroApiEntities{
   fetchDictionaryApi:string;
   getCurServerTimeApi:string;
   fetchMaterialApi:string;
+  fetchManualInstrutorApi:string;
 }
 @Injectable()
 export class MroApiProvider {
@@ -28,7 +29,8 @@ export class MroApiProvider {
     fetchWarehouse:Apis.Api_getWarehouse,
     fetchDictionaryApi:Apis.Api_getDictionaryDetail,
     getCurServerTimeApi:Apis.Api_getSystemTime,
-    fetchMaterialApi:Apis.Api_getMaterial
+    fetchMaterialApi:Apis.Api_getMaterial,
+    fetchManualInstrutorApi:Apis.Api_get_common_manual_url
   }
   constructor() {
   }

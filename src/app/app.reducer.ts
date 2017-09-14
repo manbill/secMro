@@ -23,7 +23,8 @@ export interface EpicDependencies{
   loading:LoadingController;
   mroApis:MroApiEntities;
   alterCtrl:AlertController,
-  errorHandler:ErrorHandler
+  errorHandler:ErrorHandler,
+  pagination:number;
 }
 export  const RootReducer=combineReducers({
   userState:UserRootReducer,

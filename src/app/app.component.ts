@@ -77,10 +77,10 @@ export class MyApp {
             isLogin = true;
           }
           // ☐ 判断一下是否完成了基础数据下载、或需要重新登登
-          return dbOp.executeSql(`select * from ${tableNames.eam_sync_actions} where syncStatus=?`, [1])
+          return dbOp.executeSql(`select * from ${tableNames.eam_sync_actions} where syncStatus=?`, [0])
             .map(res => {
-              const len = MroUtils.changeDbRecord2Array(res);
-              if (len.length > 0) {
+              const needDownloadActions = MroUtils.changeDbRecord2Array(res);
+              if (needDownloadActions.length > 0) {//尚有未完成的基础数据需要下载
                 isLogin = true;
               }
               return isLogin;
@@ -96,7 +96,7 @@ export class MyApp {
           const unSubscription = this.store.subscribe(() => {
             if (!this.store.getState().userState.isTokenValid) {
               this.nav.push(LoginPage);
-              unSubscription();
+              // unSubscription();
             }
           });
         },
