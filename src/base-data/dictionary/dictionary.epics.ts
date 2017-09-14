@@ -89,7 +89,10 @@ export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store:
             .map((res => MroUtils.changeDbRecord2Array(res))),
         (newData, dbRecords) => ({ newData, dbRecords }))
     })
-    .do(({ newData, dbRecords })=>console.log('newData',newData,"dbRecords",dbRecords))
+    .do(({ newData, dbRecords }) => {
+      console.log('newData', newData);
+      console.log("dbRecords", dbRecords)
+    })
     .switchMap(({ newData, dbRecords }) => {
       const dicts: Dictionary[] = newData || dbRecords;
       const dictSatate: DictionaryState = {
