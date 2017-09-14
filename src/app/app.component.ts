@@ -1,4 +1,6 @@
-import { BaseDataSyncActions ,BaseDataStateTypes} from './../base-data/base-data.actions';
+import { Project } from './../project/project.modal';
+import { User } from './../user/user.modal';
+import { BaseDataSyncActions, BaseDataStateTypes } from './../base-data/base-data.actions';
 import { HomePage } from './../pages/home/home';
 import { TabsPage } from './../pages/tabs/tabs';
 import { Observable } from 'rxjs/Observable';
@@ -47,37 +49,66 @@ export class MyApp {
           const sqls = [];
           if (res.length === 0) {
             BaseDataSyncActions.map((action) => sqls.push([`insert into ${tableNames.eam_sync_actions}(syncAction,lastSyncSuccessTime,syncStatus)values(?,?,?)`, [action, 0, 0]]));
-            Object.keys(BaseDataStateTypes).map((type)=>sqls.push([`insert into ${tableNames.eam_sync_base_data_state}(type,stateJson)values(?,?)`,[
-              BaseDataStateTypes[type],
-              null
-            ]]));
+            Object.keys(BaseDataStateTypes).map((baseType) => sqls.push([
+              `insert into ${tableNames.eam_sync_base_data_state}(type,stateJson,initActionName)values(?,?,?)`, [
+                BaseDataStateTypes[baseType]['type'],
+                JSON.stringify(BaseDataStateTypes[baseType]['state']),
+                BaseDataStateTypes[baseType]['initActionName']
+              ]
+            ]));
             return dbOp.sqlBatch(sqls);
           }
           return Observable.of(null);
         })
         .switchMap(() => {
-          if (!MroUtils.getLastLoginUserId()) {
-            console.log("用户从未登录过")
-            return Observable.of(null);//用户从未登录过
-          }
+          return dbOp.executeSql(`select * from ${tableNames.eam_sync_base_data_state}`)
+            .map(res => MroUtils.changeDbRecord2Array(res))
+            .do(res => console.log('eam_sync_base_data_state', res))
+            .map((states) => {
+              states.map((state) => {
+                // console.log(state)
+                this.store.dispatch({ type: state['initActionName'], state: JSON.parse(state['stateJson']) })
+              });
+            })
+        })
+        .switchMap(() => {
           //登录过，使用数据库中的数据初始化应用
           return dbOp.executeSql(`select * from ${tableNames.eam_user} where userId=?`, [MroUtils.getLastLoginUserId()])
+            .map(res => MroUtils.changeDbRecord2Array(res))
             .map((res) => {
-              let userState: UserState;
-              if (res.rows.length > 0) {
-                userState = JSON.parse(res.rows.item(0)["userStateJson"]);
+              let userState: UserState = {
+                companyState: {
+                  ids: [],
+                  selectedCompany: {
+                    companyId: 1,
+                    companyName: '上海风电集团有限公司',
+                    projectIds: []
+                  },
+                  companyEntities: {}
+                },
+                currentUser: new User(),
+                isTokenValid: false,
+                lastLoginTime: 0,
+                projectState: {
+                  ids: [],
+                  projectEntities: {},
+                  selectedProject: new Project()
+                }
+              };
+              if (res.length > 0) {
+                userState = JSON.parse(res[0]["userStateJson"]);
               }
+              this.store.dispatch(initUserState(userState));
               return userState;
             })
         })
         .switchMap((userState: UserState) => {
+          console.log(userState)
           let isLogin = false;
-          if (userState) {
-            this.store.dispatch(initUserState(userState));
-            if (new Date(userState.lastLoginTime).getDay() !== new Date().getDay()) {
-              isLogin = true;
-            }
-          } else {
+          if (new Date(userState.lastLoginTime).getDay() !== new Date().getDay()) {
+            isLogin = true;
+          }
+          else {
             isLogin = true;
           }
           // ☐ 判断一下是否完成了基础数据下载、或需要重新登登

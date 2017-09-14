@@ -84,15 +84,16 @@ export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store:
       }
       sqls.push([`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [curServerTime, 1, DictonaryActions.FETCH_DICTIONARY_DATA]]);
       return deps.db.sqlBatch(sqls)
+        .map(() => newData)
         .switchMap((newData) =>
           deps.db.executeSql(`select * from ${tableNames.eam_sync_dictionary_detail}`)
             .map((res => MroUtils.changeDbRecord2Array(res))),
         (newData, dbRecords) => ({ newData, dbRecords }))
     })
-    .do(({ newData, dbRecords }) => {
-      console.log('newData', newData);
-      console.log("dbRecords", dbRecords)
-    })
+    // .do(({ newData, dbRecords }) => {
+    //   console.log('newData', newData);
+    //   console.log("dbRecords", dbRecords)
+    // })
     .switchMap(({ newData, dbRecords }) => {
       const dicts: Dictionary[] = newData || dbRecords;
       const dictSatate: DictionaryState = {
@@ -103,7 +104,7 @@ export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store:
           return entities;
         }, {})
       }
-      return deps.db.executeSql(`update ${tableNames.eam_sync_base_data_state} set stateJson=? where type=?`, [JSON.stringify(dictSatate), BaseDataStateTypes.dictionary_state])
+      return deps.db.executeSql(`update ${tableNames.eam_sync_base_data_state} set stateJson=? where type=?`, [JSON.stringify(dictSatate), BaseDataStateTypes.dictionaryStateType.type])
         .map(() => ({ newData, dbRecords }))
     })
     .do(() => loading.dismiss())

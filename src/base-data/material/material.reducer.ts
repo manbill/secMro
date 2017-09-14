@@ -19,6 +19,9 @@ export const MaterialReducer = (state: MaterialState = initialState, action: Act
     default: {
       return state;
     }
+    case MaterialActions.INIT_MATERIAL_STATE: {
+      return (<MaterialActions.InitMaterialStateAction>action).state
+    }
     case MaterialActions.DO_REFRESH_MATERIALS: {//下拉刷新数据
       return {
         ...state,

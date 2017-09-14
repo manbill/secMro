@@ -128,7 +128,8 @@ export const SqlVersions: SqlVersion[] = [
     sqlStatements:[
       `create table if not exists ${tableNames.eam_sync_base_data_state}(
         type text,
-        stateJson text
+        stateJson text,
+        initActionName text
       )`
     ]
   }

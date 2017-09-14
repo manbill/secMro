@@ -174,7 +174,7 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
         materialEntities: {}
       }
       const sqls = [[`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [curServerTime, 1, MaterialActions.FETCH_MATERIAL_DATA]]];
-      sqls.push([`update ${tableNames.eam_sync_base_data_state} set stateJson=? where type=?`, [JSON.stringify(materialState), BaseDataStateTypes.materials_state]])
+      sqls.push([`update ${tableNames.eam_sync_base_data_state} set stateJson=? where type=?`, [JSON.stringify(materialState), BaseDataStateTypes.materialStatetype.type]])
       return deps.db.sqlBatch(sqls);
     })
     .mapTo(MaterialActions.fetchMaterialDataCompleted())

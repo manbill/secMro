@@ -17,6 +17,9 @@ export const DictionaryReducer = (state: DictionaryState = initState, action: Ac
     default: {
       return state;
     }
+    case DictonaryActions.INIT_DICTIONARY_STATE: {
+      return (<DictonaryActions.InitDictionaryStateAction>action).state
+    }
     case DictonaryActions.FETCH_DICTIONARY_DATA_COMPLETED: {
       const dicts = (<DictonaryActions.FetchDictionaryCompletedAction>action).dictionaries;
       return {
