@@ -35,7 +35,7 @@ import { LOGIN_SUCCESS } from '../../user/user.actions';
 export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   let curServerTime = Date.now();
   const pagination = deps.pagination;//物料列表，每次获取的数量
-  return action$.ofType(MaterialActions.FETCH_MATERIAL_DATA,LOGIN_SUCCESS)
+  return action$.ofType(MaterialActions.FETCH_MATERIAL_DATA, LOGIN_SUCCESS)
     .switchMap(() => {
       return deps.db.executeSql(`select * from ${tableNames.eam_sync_actions} where syncAction=?`, [MaterialActions.FETCH_MATERIAL_DATA])
         .map(res => {
@@ -57,6 +57,9 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
         .do(() => loading.dismiss())
     }, (lastSyncTime, serverTime) => ({ lastSyncTime, serverTime }))
     .switchMap(({ lastSyncTime, serverTime }) => {
+      const loading = deps.loading.create();
+      loading.setContent('正在下载物料...');
+      loading.present();
       curServerTime = serverTime;
       const params = {
         startDate: lastSyncTime,
@@ -64,7 +67,7 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
         page: 1
       }
       const repeat$ = new Subject();
-      const bufferCount = 1;//批量操作,这里是1000的倍数，后台每次返回1000条物料
+      const bufferCount = 10;//批量操作,这里是1000的倍数，后台每次返回1000条物料
       const maxRetryCount = 3;
       const retryIntervalTime = 2000;//每2秒尝试重新获取物料信息
       return Observable.empty().startWith('getMaterials')
@@ -166,6 +169,11 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
             })
         })
         .takeLast(1)
+        .do(() => loading.dismiss())
+        .catch(e => {
+          loading.dismiss();
+          return Observable.throw(e);
+        });
     })
     .do(() => console.log("完成所有物料缓存操作"))
     .switchMap(() => {
