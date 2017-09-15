@@ -61,7 +61,7 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
       const params = {
         startDate: lastSyncTime,
         endDate: serverTime,
-        page: 33
+        page: 1
       }
       const repeat$ = new Subject();
       const bufferCount = 1;//批量操作,这里是1000的倍数，后台每次返回1000条物料

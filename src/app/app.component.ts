@@ -1,3 +1,4 @@
+import { SelectCompanyProjectPage } from './../pages/select-company-project/select-company-project';
 import { Project } from './../project/project.modal';
 import { User } from './../user/user.modal';
 import { BaseDataSyncActions, BaseDataStateTypes } from './../base-data/base-data.actions';
@@ -119,7 +120,11 @@ export class MyApp implements OnInit, OnDestroy {
             });
             this.store.dispatch(initUserState(userState));
             if (this.store.getState().userState.isTokenValid && !shouldLogin(this.store.getState())) {
-              this.nav.push(TabsPage);
+              if(!MroUtils.isNotEmpty(this.store.getState().userState.projectState.selectedProject)){
+                this.nav.push(SelectCompanyProjectPage);
+              }else{
+                this.nav.push(TabsPage);
+              }
             }
           },
           e => console.error(e),

@@ -32,15 +32,15 @@ export const RootReducer = combineReducers({
   baseDataState: BaseDataReducer
 });
 export const RootEpics = combineEpics(RootUserEpics, errorHandleEpic, RootWarehouseEpics, RootBaseDataEpics);
-const isLoginAsPerTime=(state:AppState)=>{
+const isLoginAsPerTime = (state: AppState) => {//不是同一天，需要重新登录
   // console.log('moment(state.userState.lastLoginTime)',moment(state.userState.lastLoginTime).date());
-  // console.log('moment().date()',moment().date());
-  return moment(state.userState.lastLoginTime).date()!==moment().date()
+  // console.log('moment().date()', moment().date());
+  return moment(state.userState.lastLoginTime).date() !== moment().date();
 }
-const checkBaseDataDownloadStat=(state:AppState)=>{
-  return Object.keys(state.baseDataState).every((baseState)=>{
-    console.log('baseDataState:every: ',state.baseDataState[baseState]['isCompleted']);
+const allBaseDataCompleted = (state: AppState) => {
+  return Object.keys(state.baseDataState).every((baseState) => {
+    console.log('baseDataState:every: ', state.baseDataState[baseState]['isCompleted']);
     return state.baseDataState[baseState]['isCompleted'];
   })
 }
-export const shouldLogin=createSelector(checkBaseDataDownloadStat,isLoginAsPerTime,(stat,isLogin)=>stat&&isLogin)
+export const shouldLogin = createSelector(allBaseDataCompleted, isLoginAsPerTime, (stat, isLogin) => { console.log(stat, isLogin); return !stat || isLogin })

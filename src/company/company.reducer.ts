@@ -33,9 +33,6 @@ export function CompanyReducer(state:CompanyState=initState,action:Action):Compa
         selectedCompany:(<CompanyActions.SelectCompanyAction>action).company
       }
     }
-    // case INIT_USER_STATE:{
-    //   return (<InitUserStateAction>action).userState.companyState;
-    // }
     case CompanyActions.FETCH_COMPANIES_FULLFILED:{
       const companies =(<CompanyActions.FetchCompaniesAction>action).companies;
       return {
