@@ -10,7 +10,9 @@ export const tableNames={
   eam_sync_work_order:'eam_sync_work_order',
   eam_sync_dictionary_detail:'eam_sync_dictionary_detail',
   eam_sync_material:'eam_sync_material',
-  eam_sync_base_data_state:'eam_sync_base_data_state'
+  eam_sync_base_data_state:'eam_sync_base_data_state',
+  eam_sync_warehouse:'eam_sync_warehouse',
+  eam_sync_manual_instructor:'eam_sync_manual_instructor'
 }
 
 export const SqlVersions: SqlVersion[] = [
@@ -130,6 +132,48 @@ export const SqlVersions: SqlVersion[] = [
         type text,
         stateJson text,
         initActionName text
+      )`
+    ]
+  },
+  {
+    sqlVersion:6,
+    sqlStatements:[
+      `create table if not exists ${tableNames.eam_sync_warehouse}(
+        repertoryId number not null,
+        repertoryNo string,
+        repertoryName string,
+        repertoryLinkman string,
+        repertoryLinkmanId string,
+        repertoryContactNum string,
+        email string,
+        repertoryAddress string,
+        isBlockUp string,
+        isQuery string,
+        repertoryLevel number,
+        repertoryLimit number,
+        belongArea number,
+        belongAreaName string,
+        amount string,
+        projectId number,
+        projectName string,
+        repertoryLevelName string,
+        selProjects string,
+        isBlockUpName string,
+        isQueryName string,
+        consumeMoney string,
+        consumeNum string,
+        primary key(repertoryId)
+      )`
+    ]
+  }
+  ,
+  {
+    sqlVersion:7,
+    sqlStatements:[
+      `create table if not exists ${tableNames.eam_sync_manual_instructor}(
+        manualId,
+        manualInstructorJson text,
+        primary key(manualId)
       )`
     ]
   }

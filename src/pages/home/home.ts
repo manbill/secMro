@@ -25,9 +25,7 @@ export class HomePage implements OnInit {
     });
   }
   ngOnInit() {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
-    this.store.dispatch({type:'home'});
+    this.store.dispatch({type:'home'});//这个action主要是为了获取用户所选择的公司和项目的名称
   }
   ionViewDidLoad() {
     //  console.log('home');
@@ -39,6 +37,6 @@ export class HomePage implements OnInit {
   }
   ionViewDidLeave() {
     console.debug("ionViewDidLeave");
-    // this.unsubscribe&&this.unsubscribe();
+    this.unsubscribe&&this.unsubscribe();
   }
 }

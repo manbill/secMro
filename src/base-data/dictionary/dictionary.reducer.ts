@@ -3,13 +3,13 @@ import { combineEpics } from 'redux-observable';
 import { Action } from 'redux';
 import { Dictionary } from './dictionary.modal';
 import * as DictonaryActions from "./dictionary.actions";
+import { IBaseDataState } from '../base-data.reducer';
 export interface DictionaryEntities {
   [id: number]: Dictionary
 }
-export interface DictionaryState {
+export interface DictionaryState extends IBaseDataState{
   detailIds: number[],
-  dictionaryEntities: DictionaryEntities,
-  isCompleted: boolean
+  dictionaryEntities: DictionaryEntities
 }
 const initState = { detailIds: null, dictionaryEntities: {}, isCompleted: false };
 export const DictionaryReducer = (state: DictionaryState = initState, action: Action): DictionaryState => {

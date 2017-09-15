@@ -16,12 +16,13 @@ import 'rxjs/add/observable/throw';
 import { Action, Store } from "redux";
 import { DictionaryState } from './dictionary.reducer';
 import { BaseDataStateTypes } from '../base-data.actions';
+import { LOGIN_SUCCESS } from '../../user/user.actions';
 export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   const loading = deps.loading.create({
     content: '正在同步字典数据...'
   });
   let curServerTime = '';
-  return action$.ofType(DictonaryActions.FETCH_DICTIONARY_DATA)
+  return action$.ofType([DictonaryActions.FETCH_DICTIONARY_DATA,LOGIN_SUCCESS])
     .switchMap(() => {
       loading.present();
       //获取本地上一次成功同步数据的时间,再获取服务器当前时间，通过时间段获取增量数据

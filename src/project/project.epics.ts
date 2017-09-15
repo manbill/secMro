@@ -5,12 +5,13 @@ import { ActionsObservable } from 'redux-observable';
 import { AppState, EpicDependencies } from '../app/app.reducer';
 import { Store, Action } from 'redux';
 import { LOGIN_SUCCESS } from "../user/user.actions";
-import { fetchProjectsSuccess } from "./project.actions";
+import { fetchProjectsSuccess, SELECT_PROJECT } from './project.actions';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/observable/of';
 import { MroResponse } from '../common/mro-response';
+import { SELECT_COMPANY } from '../company/company.actions';
 
 export const fetchProjectsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => action$.ofType(LOGIN_SUCCESS)
 .switchMap(()=>{

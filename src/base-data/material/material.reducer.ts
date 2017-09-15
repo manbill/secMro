@@ -1,13 +1,13 @@
 import { Action } from 'redux';
 import { Material } from './material.modal';
 import * as MaterialActions from "./material.actions";
+import { IBaseDataState } from '../base-data.reducer';
 export interface MaterialEntities {
   [id: number]: Material;
 }
-export interface MaterialState {
+export interface MaterialState extends IBaseDataState{
   ids: number[]
   materialEntities: MaterialEntities;
-  isCompleted: boolean;
 }
 const initialState: MaterialState = {
   ids: [],
