@@ -22,7 +22,7 @@ export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store:
     content: '正在同步字典数据...'
   });
   let curServerTime = '';
-  return action$.ofType([DictonaryActions.FETCH_DICTIONARY_DATA,LOGIN_SUCCESS])
+  return action$.ofType(DictonaryActions.FETCH_DICTIONARY_DATA,LOGIN_SUCCESS)
     .switchMap(() => {
       loading.present();
       //获取本地上一次成功同步数据的时间,再获取服务器当前时间，通过时间段获取增量数据
