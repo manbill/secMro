@@ -20,7 +20,7 @@ import 'rxjs/add/operator/pluck';
 
 export const fetchManualInstructorsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   let serverTime = Date.now();
-  return action$.ofType([LOGIN_SUCCESS, FETCH_MANUAL_INSTRUCTOR_DATA])
+  return action$.ofType( FETCH_MANUAL_INSTRUCTOR_DATA,LOGIN_SUCCESS)
     .switchMap(() => {
       return deps.db.executeSql(`select * from ${tableNames.eam_sync_actions} where syncAction=?`, [FETCH_MANUAL_INSTRUCTOR_DATA])
         .map(res => {

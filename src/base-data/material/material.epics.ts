@@ -35,7 +35,7 @@ import { LOGIN_SUCCESS } from '../../user/user.actions';
 export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   let curServerTime = Date.now();
   const pagination = deps.pagination;//物料列表，每次获取的数量
-  return action$.ofType([LOGIN_SUCCESS,MaterialActions.FETCH_MATERIAL_DATA])
+  return action$.ofType(MaterialActions.FETCH_MATERIAL_DATA,LOGIN_SUCCESS)
     .switchMap(() => {
       return deps.db.executeSql(`select * from ${tableNames.eam_sync_actions} where syncAction=?`, [MaterialActions.FETCH_MATERIAL_DATA])
         .map(res => {

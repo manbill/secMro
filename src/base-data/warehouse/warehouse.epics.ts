@@ -14,7 +14,7 @@ import { WarehouseState } from './warehouse.reducer';
 import { BaseDataStateTypes } from '../base-data.actions';
 import { LOGIN_SUCCESS } from '../../user/user.actions';
 export const fetchWarehouseEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
-  return action$.ofType([LOGIN_SUCCESS, FETCH_WAREHOUSE_DATA])
+  return action$.ofType(FETCH_WAREHOUSE_DATA,LOGIN_SUCCESS)
     .switchMap(() => {
       const loading = deps.loading.create({
         content: '获取仓库信息...'
