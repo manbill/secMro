@@ -1,3 +1,4 @@
+import { FETCH_WORK_ORDERS } from './../../business-data/work-orders/work-order.actions';
 import { InventoriesPage } from './../inventories/inventories';
 import { InitUserStateAction, initUserState } from './../../user/user.actions';
 import { LoginPage } from './../login/login';
@@ -28,7 +29,15 @@ export class TabsPage implements OnInit, OnDestroy {
     //执行未完成的同步函数
     this.sqlite.executeSql(`select * from ${tableNames.eam_sync_actions} where syncStatus=?`, [0])
       .map(res => MroUtils.changeDbRecord2Array(res))
-      .do((actions) => console.log('尚未完成的基础数据actions: ', actions))
+      // .map(res => {//测试每一种数据的下载
+      //   if (res.length === 0) {
+      //     return [
+      //       { syncAction: FETCH_WORK_ORDERS }
+      //     ];
+      //   }
+      //   return res;
+      // })
+      .do((actions) => console.log('尚未完成的actions: ', actions))
       .map((actions) => {
         actions.map((action) => {
           this.store.dispatch({ type: eamSyncActionEntities[action['syncAction']] });

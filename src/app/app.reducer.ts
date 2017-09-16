@@ -1,4 +1,4 @@
-import { BusinessDataState, BusinessDataReducer } from './../business-data/business.reducer';
+import { BusinessDataState, BusinessDataReducer, RootBusinessEpics } from './../business-data/business.reducer';
 import { BaseDataReducer, RootBaseDataEpics, BaseDataState } from './../base-data/base-data.reducer';
 import { FormGroup } from '@angular/forms';
 import { WarehouseState, WarehouseReducer, RootWarehouseEpics } from './../base-data/warehouse/warehouse.reducer';
@@ -15,11 +15,6 @@ import { HttpInterceptorService } from "ng-http-interceptor";
 import { ErrorHandler } from '@angular/core';
 import { createSelector } from "reselect";
 import * as moment from "moment/moment";
-export interface AppState {
-  userState: UserState,
-  baseDataState: BaseDataState,
-  businessDataState:BusinessDataState
-}
 export interface EpicDependencies {
   http: Http;
   db: DbOperationProvider;
@@ -29,12 +24,17 @@ export interface EpicDependencies {
   errorHandler: ErrorHandler,
   pagination: number;
 }
+export interface AppState {
+  userState: UserState,
+  baseDataState: BaseDataState,
+  businessDataState: BusinessDataState
+}
 export const RootReducer = combineReducers({
   userState: UserRootReducer,
   baseDataState: BaseDataReducer,
-  businessDataState:BusinessDataReducer
+  businessDataState: BusinessDataReducer
 });
-export const RootEpics = combineEpics(RootUserEpics, errorHandleEpic, RootWarehouseEpics, RootBaseDataEpics);
+export const RootEpics = combineEpics(RootUserEpics, errorHandleEpic, RootWarehouseEpics, RootBaseDataEpics, RootBusinessEpics);
 const isLoginAsPerTime = (state: AppState) => {//不是同一天，需要重新登录
   // console.log('moment(state.userState.lastLoginTime)',moment(state.userState.lastLoginTime).date());
   // console.log('moment().date()', moment().date());

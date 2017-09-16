@@ -47,7 +47,7 @@ export class LoginPage {
   }
   createForm() {
     this.loginForm = this.fb.group({
-      userName: ['10780326', Validators.required],
+      userName: ['10700510', Validators.required],
       password: ['123456', Validators.required]
     });
   }

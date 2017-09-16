@@ -74,23 +74,24 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
       const retryIntervalTime = 2000;//每2秒尝试重新获取物料信息
       return Observable.empty().startWith('getMaterials')
         .do(() => console.log('物料下载参数', params))
-        .switchMap(() => deps.http.post(deps.mroApis.fetchMaterialApi, params))
+        .switchMap(() => deps.http.post(deps.mroApis.fetchMaterialApi, params)
+          .retryWhen((err$) => Observable
+            .range(0, maxRetryCount)
+            .zip(err$, (i, err) => ({ i, err }))
+            .mergeMap(({ i, err }) => {
+              if (i === maxRetryCount - 1) {
+                return Observable.throw(err);
+              }
+              return Observable.timer(i * retryIntervalTime);
+            })
+          )
+        )
         .repeatWhen((notifications) => {
           return repeat$.asObservable()
             .do(v => console.log("notifications", notifications),
             e => console.error(e),
             () => console.log('repeat complete'))
         })
-        .retryWhen((err$) => Observable
-          .range(0, maxRetryCount)
-          .zip(err$, (i, err) => ({ i, err }))
-          .mergeMap(({ i, err }) => {
-            if (i === maxRetryCount - 1) {
-              return Observable.throw(err);
-            }
-            return Observable.timer(i * retryIntervalTime);
-          })
-        )
         .map((res: MroResponse) => {
           console.log(res.data)
           if (res.data && res.data.length > 0) {
@@ -196,9 +197,9 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
     })
     .mapTo(MaterialActions.fetchMaterialDataCompleted())
     .mapTo(MaterialActions.loadMoreMaterials({ pageNumber: 1 }))
-    .catch((e:MroError) => {
+    .catch((e: MroError) => {
       console.error(e);
-      let err = new MroError(MroErrorCode.fetch_material_error_code, '获取物料信息失败,<br/>'+e.errorMessage, JSON.stringify(e));
+      let err = new MroError(MroErrorCode.fetch_material_error_code, '获取物料信息失败,<br/>' + e.errorMessage, JSON.stringify(e));
       return Observable.of(generateMroError(err));
     })
 }

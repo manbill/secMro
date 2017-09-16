@@ -1,3 +1,4 @@
+import { fetchWorkOrderEpics } from './work-order.epics';
 import { combineEpics } from 'redux-observable';
 import { combineReducers } from 'redux';
 import { PlannedWorkOrderState,PlannedWorkOrderReducer } from './planned-work-order/planned-work-order.reducer';
@@ -11,4 +12,4 @@ export const WorkOrderStateReducer=combineReducers({
   plannedWorkOrderState:PlannedWorkOrderReducer,
   taskWorkOrderState:TaskWorkOrderReducer
 });
-export const RootWorkOrderEpics=combineEpics();
+export const RootWorkOrderEpics = combineEpics(fetchWorkOrderEpics);

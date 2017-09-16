@@ -9,7 +9,7 @@ export interface MaintenanceTaskState extends BaseOrderList{
   maintenanceOrderentities:MaintenanceOrderEntities;
   selectedOrderId:number;
 }
-export function MaintenanceTaskReducer(state: MaintenanceTaskState, action: Action): MaintenanceTaskState {
+export function MaintenanceTaskReducer(state: MaintenanceTaskState=null, action: Action): MaintenanceTaskState {
   switch (action.type) {
     default: {
       return {

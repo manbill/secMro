@@ -26,6 +26,7 @@ import 'rxjs/add/observable/of';
 import { LoginPage } from '../pages/login/login';
 import { MroErrorCode, MroError } from "./mro-error-handler";
 import { initUserState } from "../user/user.actions";
+import { BusinessDataSyncActions } from '../business-data/business.actions';
 
 @Component({
   templateUrl: 'app.html'
@@ -57,7 +58,7 @@ export class MyApp implements OnInit, OnDestroy {
           .switchMap(res => {
             const sqls = [];
             if (res.length === 0) {
-              BaseDataSyncActions.map((action) => sqls.push([`insert into ${tableNames.eam_sync_actions}(syncAction,lastSyncSuccessTime,syncStatus)values(?,?,?)`, [action, 0, 0]]));
+              BaseDataSyncActions.concat(BusinessDataSyncActions).map((action) => sqls.push([`insert into ${tableNames.eam_sync_actions}(syncAction,lastSyncSuccessTime,syncStatus)values(?,?,?)`, [action, 0, 0]]));
               Object.keys(BaseDataStateTypes).map((baseType) => sqls.push([
                 `insert into ${tableNames.eam_sync_base_data_state}(type,stateJson,initActionName)values(?,?,?)`, [
                   BaseDataStateTypes[baseType]['type'],
