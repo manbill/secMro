@@ -21,5 +21,7 @@ export const BaseDataReducer = combineReducers({
 })
 export const RootBaseDataEpics = combineEpics(DictionaryEpics, MaterialEpics, RootWarehouseEpics, RootManualInstructorEpics)
 export interface IBaseDataState{
-  isCompleted:boolean
+  isCompleted:boolean,
+  hasMoreData?:boolean,
+  loadMoreDataCompleted?:boolean
 }

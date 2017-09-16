@@ -1,3 +1,4 @@
+import { AppState } from './../../app/app.reducer';
 import { MaterialState } from './material.reducer';
 import { Action } from 'redux';
 import { Material } from './material.modal';
@@ -28,7 +29,7 @@ export function fetchMaterialDataCompleted(): Action {
     type: FETCH_MATERIAL_DATA_COMPLETED
   }
 }
-export function loadMoreMaterials(searParams?: MaterialSearchParams): LoadMoreMaterialsAction {
+export function loadMoreMaterials(searParams: MaterialSearchParams): LoadMoreMaterialsAction {
   return {
     type: LOAD_MORE_MATERIALS,
     searParams: searParams
@@ -52,5 +53,10 @@ export interface LoadMoreMaterialsCompleteAction extends Action {
   materials: Material[];
 }
 export interface MaterialSearchParams extends BaseSearchParams {
-  params?: Material
+  materialSno?: string;
+  materialName?: string;
+}
+export function getMaterials(state: AppState): Array<Material> {
+  const entities = state.baseDataState.materialState.materialEntities;
+  return Object.keys(entities).map(key => entities[key]);
 }

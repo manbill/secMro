@@ -10,3 +10,7 @@ export const Api_getDictionaryDetail = baseUrl + "/api/common/getDictionaryDetai
 export const Api_getSystemTime = baseUrl + "/api/common/getSystemTime.api";
 export const Api_getMaterial = baseUrl + "/api/common/getMaterial.api";
 export const Api_get_common_manual_url = baseUrl + '/api/getManualInfoList.api';
+export const Api_uploadWorkOrder = baseUrl + "/api/maintain/uploadOrder.api";//上传工单接口
+export const Api_updateUploadFiles = baseUrl + '/api/updateUploadFiles.api';//上传附件接口
+export const Api_getBatchWorkorderList = "/api/maintain/getBatchWorkorderList.api"; //据时间段批量获取列表数据
+export const Api_getWorkorderFullInfoList ="/api/maintain/getWorkorderFullInfoList.api"; //以工单号获取工单所有数据

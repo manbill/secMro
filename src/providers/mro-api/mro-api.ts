@@ -18,6 +18,10 @@ export interface MroApiEntities{
   getCurServerTimeApi:string;
   fetchMaterialApi:string;
   fetchManualInstrutorApi:string;
+  uploadWorkOrdersApi:string;
+  uploadFilesApi:string;
+  getBatchWorkorderListApi:string;
+  getWorkorderFullInfoListApi:string;
 }
 @Injectable()
 export class MroApiProvider {
@@ -30,7 +34,11 @@ export class MroApiProvider {
     fetchDictionaryApi:Apis.Api_getDictionaryDetail,
     getCurServerTimeApi:Apis.Api_getSystemTime,
     fetchMaterialApi:Apis.Api_getMaterial,
-    fetchManualInstrutorApi:Apis.Api_get_common_manual_url
+    fetchManualInstrutorApi:Apis.Api_get_common_manual_url,
+    uploadFilesApi:Apis.Api_updateUploadFiles,
+    uploadWorkOrdersApi:Apis.Api_uploadWorkOrder,
+    getBatchWorkorderListApi: Apis.Api_getBatchWorkorderList,
+    getWorkorderFullInfoListApi:Apis.Api_getWorkorderFullInfoList
   }
   constructor() {
   }

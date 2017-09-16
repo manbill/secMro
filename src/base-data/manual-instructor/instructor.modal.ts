@@ -11,7 +11,7 @@ export class ManualInstructor {
     "fileType": string,
     "workType": string,
     "filePath": string,
-    "importDate": null,
+    "importDate": string,
     "checklistFileId": number,
     "businessType": number,
     "businessNo": string,

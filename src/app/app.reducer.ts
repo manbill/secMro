@@ -1,3 +1,4 @@
+import { BusinessDataState, BusinessDataReducer } from './../business-data/business.reducer';
 import { BaseDataReducer, RootBaseDataEpics, BaseDataState } from './../base-data/base-data.reducer';
 import { FormGroup } from '@angular/forms';
 import { WarehouseState, WarehouseReducer, RootWarehouseEpics } from './../base-data/warehouse/warehouse.reducer';
@@ -17,6 +18,7 @@ import * as moment from "moment/moment";
 export interface AppState {
   userState: UserState,
   baseDataState: BaseDataState,
+  businessDataState:BusinessDataState
 }
 export interface EpicDependencies {
   http: Http;
@@ -29,7 +31,8 @@ export interface EpicDependencies {
 }
 export const RootReducer = combineReducers({
   userState: UserRootReducer,
-  baseDataState: BaseDataReducer
+  baseDataState: BaseDataReducer,
+  businessDataState:BusinessDataReducer
 });
 export const RootEpics = combineEpics(RootUserEpics, errorHandleEpic, RootWarehouseEpics, RootBaseDataEpics);
 const isLoginAsPerTime = (state: AppState) => {//不是同一天，需要重新登录
@@ -43,4 +46,4 @@ const allBaseDataCompleted = (state: AppState) => {
     return state.baseDataState[baseState]['isCompleted'];
   })
 }
-export const shouldLogin = createSelector(allBaseDataCompleted, isLoginAsPerTime, (stat, isLogin) => { console.log(stat, isLogin); return !stat || isLogin })
+export const shouldLogin = createSelector(allBaseDataCompleted, isLoginAsPerTime, (stat, isLogin) => { console.log(`基础数据是否已经完成：${stat}，今天是否首次使用，需要登录:${isLogin}`); return !stat || isLogin })

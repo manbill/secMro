@@ -3,7 +3,7 @@ import { Headers } from '@angular/http';
 import { RequestOptions } from '@angular/http';
 import { RequestOptionsArgs } from '@angular/http';
 import { Loading } from "ionic-angular";
-import { not, isEmpty, compose } from "ramda";
+import { not, isEmpty,isNil, pipe,compose } from "ramda";
 import { BaseDataSyncActions } from '../base-data/base-data.actions';
 const USER_ID = 'user_id';
 export class MroUtils {
@@ -14,7 +14,7 @@ export class MroUtils {
     reqOpt.headers.append('tokenId', token);
     return reqOpt;
   }
-  static isNotEmpty = compose(not, isEmpty);
+  static isNotEmpty = (val)=>not(isNil(val))&&not(isEmpty(val));
   static setBaseDataSyncStatus(action: string) {
     return window.localStorage.setItem(action, '1');
   }

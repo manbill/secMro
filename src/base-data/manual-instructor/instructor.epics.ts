@@ -20,7 +20,7 @@ import 'rxjs/add/operator/pluck';
 
 export const fetchManualInstructorsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   let serverTime = Date.now();
-  return action$.ofType( FETCH_MANUAL_INSTRUCTOR_DATA,LOGIN_SUCCESS)
+  return action$.ofType(FETCH_MANUAL_INSTRUCTOR_DATA, LOGIN_SUCCESS)
     .switchMap(() => {
       return deps.db.executeSql(`select * from ${tableNames.eam_sync_actions} where syncAction=?`, [FETCH_MANUAL_INSTRUCTOR_DATA])
         .map(res => {
@@ -52,16 +52,18 @@ export const fetchManualInstructorsEpic = (action$: ActionsObservable<Action>, s
           return deps.http.post(deps.mroApis.fetchManualInstrutorApi, params)
             .do((res) => console.log(res['data']))
             .map((res: MroResponse) => {
-              if (res.data['dataObject']&&res.data['dataObject']['manualInfoDTO']) {
+              if (res.data['dataObject'] && res.data['dataObject']['manualInfoDTO']) {
                 params.page++;
                 setTimeout(() => repeat$.next(), 0);
               } else {
-                repeat$.complete();
+                setTimeout(() => {
+                  repeat$.complete();
+                }, 0);
               }
               return res.data['dataObject'];
             });
         })
-        .filter(r=>!R.isNil(r['manualInfoDTO']))
+        .filter(r => !R.isNil(r['manualInfoDTO']))
         .repeatWhen(() => repeat$.asObservable())
         .retryWhen(err$ => Observable.range(0, maxRetryCount)
           .zip(err$, (i, err) => ({ i, err }))

@@ -8,11 +8,15 @@ export interface MaterialEntities {
 export interface MaterialState extends IBaseDataState{
   ids: number[]
   materialEntities: MaterialEntities;
+  hasMoreData?:boolean;
+  selectedMaterialId?:number;
+  loadMoreDataCompleted?:boolean;
+  refreshCompleted?:boolean;
 }
 const initialState: MaterialState = {
   ids: [],
   materialEntities: {},
-  isCompleted: false
+  isCompleted: false,
 }
 export const MaterialReducer = (state: MaterialState = initialState, action: Action): MaterialState => {
   switch (action.type) {
@@ -26,13 +30,16 @@ export const MaterialReducer = (state: MaterialState = initialState, action: Act
       return {
         ...state,
         ids: [],
-        materialEntities: {}
+        materialEntities: {},
+        refreshCompleted:true
       }
     }
     case MaterialActions.FETCH_MATERIAL_DATA_COMPLETED: {//完成物料数据下载
       return {
         ...state,
-        isCompleted: true
+        isCompleted: true,
+        refreshCompleted:false,
+        loadMoreDataCompleted:false
       }
     }
     case MaterialActions.LOAD_MORE_MATERIALS_COMPLETE: {//上拉加载更多数据
@@ -40,7 +47,9 @@ export const MaterialReducer = (state: MaterialState = initialState, action: Act
       return {
         ...state,
         ids: state.ids.concat(materials.map(m => m.materialId)),
-        materialEntities: Object.assign({}, state.materialEntities, materials.reduce((entities, m) => { entities[m.materialId] = m; return entities }, {}))
+        materialEntities: Object.assign({}, state.materialEntities, materials.reduce((entities, m) => { entities[m.materialId] = m; return entities }, {})),
+        loadMoreDataCompleted:true,
+        hasMoreData:materials.length!==0
       }
     }
   }

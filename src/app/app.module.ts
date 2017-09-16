@@ -1,3 +1,4 @@
+import { InventoriesPage } from './../pages/inventories/inventories';
 import { SelectCompanyProjectPage } from './../pages/select-company-project/select-company-project';
 import { MroAppStoreProvider } from './app.store';
 import { NgModule, ErrorHandler } from '@angular/core';
@@ -5,9 +6,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule } from 'ionic-angular';
 import { MroErrorHandler,MroErrorHandlerProvider } from "./mro-error-handler";
 import { MyApp } from './app.component';
-
 import { AboutPage } from '../pages/about/about';
-import { ContactPage } from '../pages/contact/contact';
 import { HomePage } from '../pages/home/home';
 import { TabsPage } from '../pages/tabs/tabs';
 import { LoginPage } from "../pages/login/login";
@@ -23,7 +22,7 @@ import { HttpInterceptorModule } from "ng-http-interceptor";
   declarations: [
     MyApp,
     AboutPage,
-    ContactPage,
+    InventoriesPage,
     HomePage,
     TabsPage,
     LoginPage,
@@ -40,7 +39,7 @@ import { HttpInterceptorModule } from "ng-http-interceptor";
   entryComponents: [
     MyApp,
     TabsPage,
-    ContactPage,
+    InventoriesPage,
     AboutPage,
     HomePage,
     LoginPage,

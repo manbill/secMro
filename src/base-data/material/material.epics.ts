@@ -1,3 +1,4 @@
+import { Subject } from 'rxjs/Subject';
 import { tableNames } from './../../providers/db-operation/mro.tables';
 import { ActionsObservable, combineEpics } from 'redux-observable';
 import { AppState, EpicDependencies } from '../../app/app.reducer';
@@ -10,7 +11,6 @@ import 'rxjs/add/operator/catch';
 import { generateMroError, MroError, MroErrorCode } from '../../app/mro-error-handler';
 import { MroUtils } from '../../common/mro-util';
 import { MroResponse } from '../../common/mro-response';
-import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/repeatWhen';
 import 'rxjs/add/operator/retryWhen';
 import 'rxjs/add/operator/zip';
@@ -22,6 +22,8 @@ import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/scan';
 import 'rxjs/add/operator/startWith';
+import 'rxjs/add/operator/take';
+import 'rxjs/add/operator/finally';
 import 'rxjs/add/operator/takeLast';
 import * as R from "ramda";
 import { Loading } from 'ionic-angular';
@@ -48,13 +50,13 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
         })
     })
     .do(res => { console.log(res) })
-    .map(time => 0)
+    // .map(time => 0)//用来测试下载物料的过程
     .switchMap(lastSyncTime => {
       const loading = deps.loading.create();
       loading.setContent('获取服务器时间...');
       loading.present();
       return deps.http.get(deps.mroApis.getCurServerTimeApi).map((res: MroResponse) => res.data)
-        .do(() => loading.dismiss())
+        .finally(() => loading.dismiss())
     }, (lastSyncTime, serverTime) => ({ lastSyncTime, serverTime }))
     .switchMap(({ lastSyncTime, serverTime }) => {
       const loading = deps.loading.create();
@@ -73,7 +75,12 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
       return Observable.empty().startWith('getMaterials')
         .do(() => console.log('物料下载参数', params))
         .switchMap(() => deps.http.post(deps.mroApis.fetchMaterialApi, params))
-        .repeatWhen(() => repeat$.asObservable())
+        .repeatWhen((notifications) => {
+          return repeat$.asObservable()
+            .do(v => console.log("notifications", notifications),
+            e => console.error(e),
+            () => console.log('repeat complete'))
+        })
         .retryWhen((err$) => Observable
           .range(0, maxRetryCount)
           .zip(err$, (i, err) => ({ i, err }))
@@ -85,16 +92,17 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
           })
         )
         .map((res: MroResponse) => {
+          console.log(res.data)
           if (res.data && res.data.length > 0) {
+            setTimeout(() => repeat$.next(), 0);
             params.page++;
-            setTimeout(() => {
-              repeat$.next()
-            }, 0);
           } else {
             if (!res.data) {
               repeat$.error(res.retInfo);
             } else if (res.data.length === 0) {
-              repeat$.complete();
+              setTimeout(() => {
+                repeat$.complete();
+              }, 0)
             }
           }
           return res.data
@@ -169,9 +177,9 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
             })
         })
         .takeLast(1)
-        .do(() => loading.dismiss())
+        .finally(() => loading.dismiss())
         .catch(e => {
-          loading.dismiss();
+          console.error(e);
           return Observable.throw(e);
         });
     })
@@ -187,9 +195,10 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
       return deps.db.sqlBatch(sqls);
     })
     .mapTo(MaterialActions.fetchMaterialDataCompleted())
-    .catch(e => {
+    .mapTo(MaterialActions.loadMoreMaterials({ pageNumber: 1 }))
+    .catch((e:MroError) => {
       console.error(e);
-      let err = new MroError(MroErrorCode.fetch_dictionary_error_code, '获取物料信息失败', JSON.stringify(e));
+      let err = new MroError(MroErrorCode.fetch_material_error_code, '获取物料信息失败,<br/>'+e.errorMessage, JSON.stringify(e));
       return Observable.of(generateMroError(err));
     })
 }
@@ -201,21 +210,31 @@ export const loadMoreMaterialsEpic = (action$: ActionsObservable<Action>, store:
   return action$.ofType(MaterialActions.LOAD_MORE_MATERIALS)
     .switchMap((action) => {
       const searchParams = (<MaterialActions.LoadMoreMaterialsAction>action).searParams;
-      const skipRecords = deps.pagination * (searchParams.pageNumber - 1);
+      const skipRecords = deps.pagination * ((searchParams.pageNumber || 1) - 1);
       let where = '';
       const values = [];
-      if (MroUtils.isNotEmpty(searchParams.params.materialSno)) {
+      console.debug(searchParams, MroUtils.isNotEmpty(null))
+      if (MroUtils.isNotEmpty(searchParams.materialSno)) {
         where += ' and materialSno like ? ';
-        values.push(`%${searchParams.params.materialSno}%`);
+        values.push(`%${searchParams.materialSno}%`);
       }
-      if (MroUtils.isNotEmpty(searchParams.params.materialName)) {
+      if (MroUtils.isNotEmpty(searchParams.materialName)) {
         where += ` and materialName like ? `;
-        values.push(`%${searchParams.params.materialName}%`);
+        values.push(`%${searchParams.materialName}%`);
       }
       values.push(skipRecords);
-      return deps.db.executeSql(`select * from ${tableNames.eam_sync_material} where 1=1 ${where} limit ?,${deps.pagination}`, values)
+      const sql = `select * from ${tableNames.eam_sync_material} where 1=1 ${where} limit ?,${deps.pagination}`;
+      return deps.db.executeSql(sql, values)
+        .do(() => console.log(sql, values))
         .map(res => MroUtils.changeDbRecord2Array(res))
     })
-    .map((materials) => MaterialActions.loadMoreMaterialsComplete(materials));
+    .do((val) => console.log(val))
+    .map((materials) => MaterialActions.loadMoreMaterialsComplete(materials))
+    .catch(e => {
+      console.error(e);
+      let err = new MroError(MroErrorCode.load_more_material_error_code, '加载更多物料信息失败', JSON.stringify(e));
+      return Observable.of(generateMroError(err));
+    })
+    ;
 }
 export const MaterialEpics = combineEpics(fetchMaterialsEpic, doRefreshMaterialDataEpic, loadMoreMaterialsEpic);

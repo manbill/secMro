@@ -64,7 +64,8 @@ export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loadi
           throw (err);
         }
         if (r.json().retCode !== '00000') {
-          throw (r.json().retInfo || "网络请求失败!");
+          let err = new MroError(MroErrorCode.token_invalid_error_code, 'token失效，请重新登录', r.json().retInfo|| "网络请求失败!");
+          throw (err);
         }
         return r.json();
       });

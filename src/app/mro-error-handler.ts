@@ -80,6 +80,8 @@ export enum MroErrorCode {
   dictionary_db_insert_error_code,//字典
   dictionary_db_update_error_code,//字典
   fetch_dictionary_error_code,//字典
+  fetch_material_error_code,//字典
+  load_more_material_error_code,//字典
   user_login_error_code,
   user_info_db_upsert_error_code,
   user_info_db_update_error_code,
