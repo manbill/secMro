@@ -3,7 +3,7 @@ import { combineEpics } from 'redux-observable';
 import { Action } from 'redux';
 import { IBusinessDataBaseState } from './../work-orders.reducer';
 import { WorkOrder } from "../work-order.modal";
-
+import * as FaultOrderActions from "./fault-order.actions";
 export interface FaultOrderState extends IBusinessDataBaseState {
 
 }
@@ -12,6 +12,15 @@ export function FaultOrderReducer(state: FaultOrderState = null, action: Action)
     default: {
       return {
         ...state
+      }
+    }
+    case FaultOrderActions.REFRESH_FAULT_ORDER_LIST:{
+      return {
+        ...state,
+        ids:[],
+        entities:{},
+        hasMoreData:true,
+        refreshCompleted:true
       }
     }
   }
