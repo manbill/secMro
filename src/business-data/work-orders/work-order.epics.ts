@@ -1,8 +1,9 @@
+import { FETCH_MAINTENANCE_TASK_DATA, fetchMaintenanceTaskOrdersCompleted } from './planned-work-order/maintenance-orders/maintenance-order.actions';
+import { BusinessDataSyncActions, BusinessDataSyncActionsEntities } from './../business.actions';
 import { SELECT_PROJECT } from './../../project/project.actions';
 import { WorkOrder, ApiWorkorderBaseInfoDto } from './work-order.modal';
 import { Subject } from 'rxjs/Subject';
 import { MroError, generateMroError } from './../../app/mro-error-handler';
-import { FETCH_WORK_ORDERS, fetchWorkordersCompleted } from './work-order.actions';
 import { MroResponse } from './../../common/mro-response';
 import { MroUtils } from './../../common/mro-util';
 import { AppState, EpicDependencies } from './../../app/app.reducer';
@@ -14,9 +15,11 @@ import 'rxjs/add/observable/from';
 
 export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   let currentServerTime = Date.now();
-  return action$.ofType(FETCH_WORK_ORDERS, SELECT_PROJECT)
-    .switchMap(() => {
-      return deps.db.executeSql(`select * from ${tableNames.eam_sync_actions} where syncAction=?`, [FETCH_WORK_ORDERS])
+  let actionType: Action;
+  return action$.ofType(...BusinessDataSyncActions)
+    .switchMap((action) => {
+      actionType = action;
+      return deps.db.executeSql(`select * from ${tableNames.eam_sync_actions} where syncAction=?`, [action.type])
         .map(res => {
           let lastSyncSuccessTime = 0;
           const results = MroUtils.changeDbRecord2Array(res);
@@ -41,7 +44,7 @@ export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: S
       const batchCount = 10;//每次批量处理的工单数，这里是downloadCount的倍数
       currentServerTime = curServerTime;
       return deps.http.post(deps.mroApis.getBatchWorkorderListApi, {
-        workorderTypeString: "",//	工单类型(查询时// :pc端:37-风云工单,38-人工工单,39-工程工单,67-服务工单,68-整改/技改工单;手机端:4-scada工单；返回时，都是按照pc端的);传入空字符串，返回所有类型工单
+        workorderTypeString: BusinessDataSyncActionsEntities[actionType.type].workorderTypeString,//	工单类型(查询时// :pc端:37-风云工单,38-人工工单,39-工程工单,67-服务工单,68-整改/技改工单;手机端:4-scada工单；返回时，都是按照pc端的);传入空字符串，返回所有类型工单
         startDate: lastSyncSuccessTime,
         endDate: curServerTime,
         projectId: store.getState().userState.projectState.selectedProject.projectId
@@ -182,11 +185,18 @@ export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: S
         })
         .finally(() => loading.dismiss());
     })
-    .do(() => console.log('完成所有工单数据下载'))
+    .do(() => console.log('完成所有工单数据下载', actionType.type))
     .switchMap(() => {
-      return deps.db.executeSql(`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [currentServerTime, 1, FETCH_WORK_ORDERS]);
+      const sqls = [];
+      return deps.db.executeSql(`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [currentServerTime, 1, actionType.type]);
     })
-    .map(() => fetchWorkordersCompleted())
+    .map(() => {
+      switch (actionType.type) {
+        case FETCH_MAINTENANCE_TASK_DATA: {
+          return fetchMaintenanceTaskOrdersCompleted();
+        }
+      }
+    })
     .catch((e: MroError) => {
       console.error(e);
       return Observable.throw(generateMroError(e));

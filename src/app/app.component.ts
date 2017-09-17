@@ -26,7 +26,7 @@ import 'rxjs/add/observable/of';
 import { LoginPage } from '../pages/login/login';
 import { MroErrorCode, MroError } from "./mro-error-handler";
 import { initUserState } from "../user/user.actions";
-import { BusinessDataSyncActions } from '../business-data/business.actions';
+import { BusinessDataSyncActions} from '../business-data/business.actions';
 
 @Component({
   templateUrl: 'app.html'
@@ -57,8 +57,12 @@ export class MyApp implements OnInit, OnDestroy {
           })
           .switchMap(res => {
             const sqls = [];
+            console.log(res);
+            const actions = BaseDataSyncActions.concat(BusinessDataSyncActions);
+            console.log('actions', actions);
+            console.log('actions filter', actions.filter((action) => !res.some((a) => a['syncAction'] === action)));
+            actions.filter((action) => !res.some((a) => a['syncAction'] === action)).map((action) => sqls.push([`insert into ${tableNames.eam_sync_actions}(syncAction,lastSyncSuccessTime,syncStatus)values(?,?,?)`, [action, 0, 0]]));
             if (res.length === 0) {
-              BaseDataSyncActions.concat(BusinessDataSyncActions).map((action) => sqls.push([`insert into ${tableNames.eam_sync_actions}(syncAction,lastSyncSuccessTime,syncStatus)values(?,?,?)`, [action, 0, 0]]));
               Object.keys(BaseDataStateTypes).map((baseType) => sqls.push([
                 `insert into ${tableNames.eam_sync_base_data_state}(type,stateJson,initActionName)values(?,?,?)`, [
                   BaseDataStateTypes[baseType]['type'],
@@ -66,9 +70,8 @@ export class MyApp implements OnInit, OnDestroy {
                   BaseDataStateTypes[baseType]['initActionName']
                 ]
               ]));
-              return this.dbOp.sqlBatch(sqls);
             }
-            return Observable.of(null);
+            return this.dbOp.sqlBatch(sqls);
           })
           .switchMap(() => {
             return this.dbOp.executeSql(`select * from ${tableNames.eam_sync_base_data_state}`)
@@ -121,9 +124,9 @@ export class MyApp implements OnInit, OnDestroy {
             });
             this.store.dispatch(initUserState(userState));
             if (this.store.getState().userState.isTokenValid && !shouldLogin(this.store.getState())) {
-              if(!MroUtils.isNotEmpty(this.store.getState().userState.projectState.selectedProject)){
+              if (!MroUtils.isNotEmpty(this.store.getState().userState.projectState.selectedProject)) {
                 this.nav.push(SelectCompanyProjectPage);
-              }else{
+              } else {
                 this.nav.push(TabsPage);
               }
             }

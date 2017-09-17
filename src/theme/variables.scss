@@ -45,7 +45,8 @@ $colors: (
 // App iOS Variables
 // --------------------------------------------------
 // iOS only Sass variables can go here
-
+$segment-button-ios-background-color:color($colors,light);
+// $segment-button-ios-background-color:color($colors,primary);
 
 
 
@@ -53,7 +54,6 @@ $colors: (
 // --------------------------------------------------
 // Material Design only Sass variables can go here
 $item-md-detail-push-show:true;
-
 
 
 // App Windows Variables

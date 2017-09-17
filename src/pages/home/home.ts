@@ -1,3 +1,4 @@
+import { MaintenanceOrdersPage } from './../maintenance-orders/maintenance-orders';
 import { UserState } from './../../user/user.reducer';
 import { Store, Unsubscribe } from 'redux';
 import { AppState } from '../../app/app.reducer';
@@ -19,6 +20,7 @@ export class HomePage implements OnInit {
     @Inject(AppStore) private store: Store<AppState>,
     private sqlite: DbOperationProvider,
     private navParams: NavParams) {
+    this.navCtrl.push(MaintenanceOrdersPage);
     this.unsubscribe = store.subscribe(() => {
       this.companyName = store.getState().userState.companyState.selectedCompany.companyName;
       this.projectName = store.getState().userState.projectState.selectedProject.projectName;
@@ -34,6 +36,9 @@ export class HomePage implements OnInit {
     // console.log("getPrevious",this.navCtrl.getPrevious());
     // console.log("last",this.navCtrl.last());
     // console.log("first",this.navCtrl.first());
+  }
+  maintenanceOrders(){
+    this.navCtrl.push(MaintenanceOrdersPage);
   }
   ionViewDidLeave() {
     console.debug("ionViewDidLeave");
