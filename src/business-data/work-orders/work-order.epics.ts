@@ -12,6 +12,7 @@ import { Observable } from 'rxjs/Observable';
 import { Store, Action } from 'redux';
 import { ActionsObservable } from 'redux-observable';
 import 'rxjs/add/observable/from';
+import { fetchWorkOrderDataCompleted } from './work-order.actions';
 
 export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   let currentServerTime = Date.now();
@@ -190,13 +191,7 @@ export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: S
       const sqls = [];
       return deps.db.executeSql(`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [currentServerTime, 1, actionType.type]);
     })
-    .map(() => {
-      switch (actionType.type) {
-        case FETCH_MAINTENANCE_TASK_DATA: {
-          return fetchMaintenanceTaskOrdersCompleted();
-        }
-      }
-    })
+    .mapTo(fetchWorkOrderDataCompleted())
     .catch((e: MroError) => {
       console.error(e);
       return Observable.throw(generateMroError(e));
