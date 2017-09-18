@@ -143,11 +143,12 @@ export class DbOperationProvider {
                 .reduce((sqls, sqlVer) => sqls.concat(sqlVer.sqlStatements
                   .filter(sql => sql && sql !== '')
                 ), []);
-                if(lastSqlVer!==+lastestSqlVersion){
+                if(+lastSqlVer!==+lastestSqlVersion){
                   sqls.push([updateSqlver,[lastestSqlVersion]]);
                 }
               return sqls;
             })
+            .do(()=>console.log('数据库版本变更',sqls))
             .switchMap((sqls) => this.sqlBatch(sqls));
         } else {
           sqls = SqlVersions

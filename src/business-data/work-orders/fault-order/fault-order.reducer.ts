@@ -3,11 +3,11 @@ import { Action } from 'redux';
 import { IBusinessDataBaseState } from './../work-orders.reducer';
 import { WorkOrder } from '../work-order.modal';
 import * as FaultOrderActions from "./fault-order.actions";
-import { manualRefreshFaultOrderListEpic, autoRefreshFaultOrderListEpic, updateSelectedFaultOrderEpic, loadMoreFaultOrdersEpic } from './fault-order.epics';
+import { manualRefreshFaultOrderListEpic, autoRefreshFaultOrderListEpic, updateSelectedFaultOrderEpic, loadMoreFaultOrdersEpic, createFaultOrderEpic } from './fault-order.epics';
 import { LOAD_MORE_FAULT_ORDER_DATA, LOAD_MORE_FAULT_ORDER_DATA_COMPLETED } from './fault-order.actions';
 import { AppState } from '../../../app/app.reducer';
 export interface FaultOrderState extends IBusinessDataBaseState {
-
+  createFaultOrderCompleted: boolean;
 }
 const initState: FaultOrderState = {
   ids: [],
@@ -15,13 +15,26 @@ const initState: FaultOrderState = {
   hasMoreData: true,
   loadMoreDataCompleted: false,
   refreshCompleted: false,
-  selectedWorkOrderId: null
+  selectedWorkOrderId: null,
+  createFaultOrderCompleted: true
 }
 export function FaultOrderReducer(state: FaultOrderState = initState, action: Action): FaultOrderState {
   switch (action.type) {
     default: {
       return {
         ...state
+      }
+    }
+    case FaultOrderActions.CREATE_FAULT_ORDER: {
+      return {
+        ...state,
+        createFaultOrderCompleted: false
+      }
+    }
+    case FaultOrderActions.CREATE_FAULT_ORDER_COMPLETED: {
+      return {
+        ...state,
+        createFaultOrderCompleted: true
       }
     }
     case FaultOrderActions.LOAD_MORE_FAULT_ORDER_DATA: {
@@ -35,7 +48,7 @@ export function FaultOrderReducer(state: FaultOrderState = initState, action: Ac
       return {
         ...state,
         ids: state.ids.concat(faultOrders.map(order => order.apiWorkorderBaseInfoDto.workorderId)),
-        entities: Object.assign({}, state.entities, faultOrders.reduce((obj, order) => { obj[order.apiWorkorderBaseInfoDto.workorderId]=order; return obj }, {})),
+        entities: Object.assign({}, state.entities, faultOrders.reduce((obj, order) => { obj[order.apiWorkorderBaseInfoDto.workorderId] = order; return obj }, {})),
         loadMoreDataCompleted: true,
         hasMoreData: faultOrders.length !== 0,
       }
@@ -57,7 +70,7 @@ export function FaultOrderReducer(state: FaultOrderState = initState, action: Ac
         ids: faultOrders.map(order => order.apiWorkorderBaseInfoDto.workorderId),
         entities: faultOrders.reduce((obj, order) => { obj[order.apiWorkorderBaseInfoDto.workorderId] = order; return obj; }, {}),
         hasMoreData: faultOrders.length !== 0,
-        refreshCompleted:true
+        refreshCompleted: true
       }
     }
     case FaultOrderActions.UPDATE_SELECTED_FAULT_ORDER: {
@@ -69,8 +82,8 @@ export function FaultOrderReducer(state: FaultOrderState = initState, action: Ac
     }
   }
 }
-export const RootFaultOrderEpics = combineEpics(autoRefreshFaultOrderListEpic, manualRefreshFaultOrderListEpic, updateSelectedFaultOrderEpic, loadMoreFaultOrdersEpic);
 
 export function getFaultOrderItems(state: AppState): Array<WorkOrder> {
   return state.businessDataState.workOrderState.faultOrderState.ids.map(id => state.businessDataState.workOrderState.faultOrderState.entities[id]);
 }
+export const RootFaultOrderEpics = combineEpics(autoRefreshFaultOrderListEpic, createFaultOrderEpic, manualRefreshFaultOrderListEpic, updateSelectedFaultOrderEpic, loadMoreFaultOrdersEpic);

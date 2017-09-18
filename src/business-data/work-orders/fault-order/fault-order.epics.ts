@@ -6,6 +6,7 @@ import { MANUAL_REFRESH_FAULT_ORDER_LIST, AutoRefreshFaultOrderListAction } from
 import { tableNames } from '../../../providers/db-operation/mro.tables';
 import { MroUtils } from '../../../common/mro-util';
 import { WorkOrder } from '../work-order.modal';
+import { upsertWorkOrders } from '../work-order.epics';
 export const autoRefreshFaultOrderListEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(FaultOrderActions.AUTO_REFRESH_FAULT_ORDER_LIST)
     .switchMap((action) => {
@@ -78,4 +79,12 @@ export const loadMoreFaultOrdersEpic = (action$: ActionsObservable<Action>, stor
     })
     .do(res => console.log('LoadMoreFaultOrderDataCompleted', res))
     .map(orders => FaultOrderActions.loadMoreFaultOrdersCompleted(orders));
+}
+export const createFaultOrderEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
+  return action$.ofType(FaultOrderActions.CREATE_FAULT_ORDER)
+    .switchMap((action) => {
+      const faultOrder = (<FaultOrderActions.CreateFaultOrderAction>action).faultOrder;
+      return upsertWorkOrders([[faultOrder]], deps.db);
+    })
+    .map(() => FaultOrderActions.createFaultOrderCompleted());
 }

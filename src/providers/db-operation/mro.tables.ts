@@ -2,17 +2,19 @@ interface SqlVersion {
   sqlVersion: number,
   sqlStatements: string[]
 }
-export const tableNames={
-  eam_sql_version:'eam_sql_version',
-  eam_user:'eam_user',
-  eam_sync_actions:'eam_sync_actions',
-  eam_sync_file:'eam_sync_file',
-  eam_sync_work_order:'eam_sync_work_order',
-  eam_sync_dictionary_detail:'eam_sync_dictionary_detail',
-  eam_sync_material:'eam_sync_material',
-  eam_sync_base_data_state:'eam_sync_base_data_state',
-  eam_sync_warehouse:'eam_sync_warehouse',
-  eam_sync_manual_instructor:'eam_sync_manual_instructor'
+export const tableNames = {
+  eam_sql_version: 'eam_sql_version',
+  eam_user: 'eam_user',
+  eam_sync_actions: 'eam_sync_actions',
+  eam_sync_file: 'eam_sync_file',
+  eam_sync_work_order: 'eam_sync_work_order',
+  eam_sync_dictionary_detail: 'eam_sync_dictionary_detail',
+  eam_sync_material: 'eam_sync_material',
+  eam_sync_base_data_state: 'eam_sync_base_data_state',
+  eam_sync_warehouse: 'eam_sync_warehouse',
+  eam_sync_manual_instructor: 'eam_sync_manual_instructor',
+  eam_sync_fan_machine_equipment: 'eam_fan_machine_equipment',
+  eam_sync_fan_machine_equipment_detail: 'eam_sync_fan_machine_equipment_detail',
 }
 
 export const SqlVersions: SqlVersion[] = [
@@ -34,8 +36,8 @@ export const SqlVersions: SqlVersion[] = [
     ]
   },
   {
-    sqlVersion:2,
-    sqlStatements:[
+    sqlVersion: 2,
+    sqlStatements: [
       `create table if not exists ${tableNames.eam_sync_dictionary_detail}(
         detailId int not null,
         detailName text,
@@ -53,8 +55,8 @@ export const SqlVersions: SqlVersion[] = [
     ]
   },
   {
-    sqlVersion:3,
-    sqlStatements:[
+    sqlVersion: 3,
+    sqlStatements: [
       `create table if not exists ${tableNames.eam_sync_work_order}(
         activeFlag text,
         areaType text,
@@ -92,8 +94,8 @@ export const SqlVersions: SqlVersion[] = [
     ]
   },
   {
-    sqlVersion:4,
-    sqlStatements:[
+    sqlVersion: 4,
+    sqlStatements: [
       `create table if not exists ${tableNames.eam_sync_material}(
         materialId int not null,
         materialName text,
@@ -126,8 +128,8 @@ export const SqlVersions: SqlVersion[] = [
     ]
   },
   {
-    sqlVersion:5,
-    sqlStatements:[
+    sqlVersion: 5,
+    sqlStatements: [
       `create table if not exists ${tableNames.eam_sync_base_data_state}(
         type text,
         stateJson text,
@@ -136,8 +138,8 @@ export const SqlVersions: SqlVersion[] = [
     ]
   },
   {
-    sqlVersion:6,
-    sqlStatements:[
+    sqlVersion: 6,
+    sqlStatements: [
       `create table if not exists ${tableNames.eam_sync_warehouse}(
         repertoryId number not null,
         repertoryNo string,
@@ -168,13 +170,40 @@ export const SqlVersions: SqlVersion[] = [
   }
   ,
   {
-    sqlVersion:7,
-    sqlStatements:[
+    sqlVersion: 7,
+    sqlStatements: [
       `create table if not exists ${tableNames.eam_sync_manual_instructor}(
         manualId,
         manualInstructorJson text,
         primary key(manualId)
       )`
+    ]
+  }
+  ,
+  {
+    sqlVersion: 8,
+    sqlStatements: [
+      `create table if not exists ${tableNames.eam_sync_fan_machine_equipment}(
+        id int not null,
+        machineTypeName text,
+        machineId int,
+        machineTypeId text,
+        projectId text,
+        projectName text ,
+        positionId text,
+        areaCode text,
+        areaName text,
+        positionCode text,
+        primary key (id)
+      )`,
+      `create table if not exists ${tableNames.eam_sync_fan_machine_equipment_detail}(
+        id int,
+        machineId int,
+        equipmentTreeJson text,
+        equipmentsDetailsJson text,
+        fanMachineInfo text
+      )
+      `
     ]
   }
 ]

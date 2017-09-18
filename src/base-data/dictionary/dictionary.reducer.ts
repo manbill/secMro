@@ -1,3 +1,4 @@
+import { AppState } from './../../app/app.reducer';
 import { fetDictionaryDataEpic } from './dictionary.epics';
 import { combineEpics } from 'redux-observable';
 import { Action } from 'redux';
@@ -32,3 +33,13 @@ export const DictionaryReducer = (state: DictionaryState = initState, action: Ac
   }
 }
 export const DictionaryEpics = combineEpics(...[fetDictionaryDataEpic]);
+export function getFaultOrderStatusDictionaries(state:AppState):Array<Dictionary>{
+  const entities = state.baseDataState.dictionaryState.dictionaryEntities;
+  const dicts:Dictionary[]=Object.keys(entities).map(id=>entities[id]);
+  return dicts.filter(dict=>dict.paraType==='workorder_status');
+}
+export function getPlannedOrderStatusDictionaries(state:AppState):Array<Dictionary>{
+  const entities = state.baseDataState.dictionaryState.dictionaryEntities;
+  const dicts:Dictionary[]=Object.keys(entities).map(id=>entities[id]);
+  return dicts.filter(dict=>dict.paraType==='sworkorder_status');
+}

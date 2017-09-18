@@ -1,3 +1,4 @@
+import { CreateFaultOrderPage } from './../create-fault-order/create-fault-order';
 import { Component, Inject } from '@angular/core';
 import { IonicPage, NavController, NavParams, Refresher, InfiniteScroll } from 'ionic-angular';
 import { WorkOrder } from '../../business-data/work-orders/work-order.modal';
@@ -99,5 +100,8 @@ export class FaultOrderPage {
       }
     });
     this.store.dispatch(loadMoreFaultOrders(this.searchForm.value));
+  }
+  createFaultOrder(){
+    this.navCtrl.push(CreateFaultOrderPage);
   }
 }

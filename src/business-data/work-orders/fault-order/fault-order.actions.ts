@@ -10,6 +10,8 @@ export const AUTO_REFRESH_FAULT_ORDER_LIST_COMPLETED = 'auto_refresh_fault_order
 export const UPDATE_SELECTED_FAULT_ORDER = 'update_selected_fault_order';
 export const LOAD_MORE_FAULT_ORDER_DATA = 'load_more_fault_order_data';
 export const LOAD_MORE_FAULT_ORDER_DATA_COMPLETED = 'load_more_fault_order_data_completed';
+export const CREATE_FAULT_ORDER='create_fault_order';
+export const CREATE_FAULT_ORDER_COMPLETED='create_fault_order_completed';
 export interface FaultOrderSearchParams extends BaseSearchParams{
   searchParams:{
     workorderCode:string;
@@ -19,6 +21,20 @@ export interface FaultOrderSearchParams extends BaseSearchParams{
     faultBegindate:number;
     workorderStatus:number;
     workorderType:string;
+  }
+}
+export interface CreateFaultOrderAction extends Action{
+  faultOrder:WorkOrder
+}
+export function createFaultOrder(faultOrder:WorkOrder):CreateFaultOrderAction{
+  return {
+    type:CREATE_FAULT_ORDER,
+    faultOrder:faultOrder
+  }
+}
+export function createFaultOrderCompleted():Action{
+  return {
+    type:CREATE_FAULT_ORDER_COMPLETED
   }
 }
 export interface LoadMoreFaultOrderDataAction extends Action {

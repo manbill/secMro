@@ -1,3 +1,5 @@
+import { Project } from './../project/project.modal';
+import { AppState } from './../app/app.reducer';
 import { RootCompanyEpics } from './../company/company.reducer';
 import { User } from './user.modal';
 import { combineReducers, Action } from 'redux';
@@ -64,4 +66,9 @@ export const UserRootReducer = combineReducers({
   isTokenValid: TokenReducer
 });
 export const RootUserEpics = combineEpics(loginEpic, RootProjectEpics, RootCompanyEpics, setUserStateEpic);
-
+export function getUserSelectedProjectId(state: AppState): number {
+  return state.userState.projectState.selectedProject.projectId;
+};
+export function getUserSelectedProject(state: AppState): Project {
+  return state.userState.projectState.selectedProject
+}

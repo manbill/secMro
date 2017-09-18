@@ -1,3 +1,4 @@
+import { CreateFaultOrderPageModule } from './../pages/create-fault-order/create-fault-order.module';
 import { MaintenanceOrdersPageModule } from './../pages/maintenance-orders/maintenance-orders.module';
 import { InventoriesPage } from './../pages/inventories/inventories';
 import { SelectCompanyProjectPage } from './../pages/select-company-project/select-company-project';
@@ -38,6 +39,7 @@ import { FaultOrderPageModule } from '../pages/fault-order/fault-order.module';
     HttpInterceptorModule,
     MaintenanceOrdersPageModule,
     FaultOrderPageModule,
+    CreateFaultOrderPageModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [

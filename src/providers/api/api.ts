@@ -14,3 +14,5 @@ export const Api_uploadWorkOrder = baseUrl + "/api/maintain/uploadOrder.api";//�
 export const Api_updateUploadFiles = baseUrl + '/api/updateUploadFiles.api';//上传附件接口
 export const Api_getBatchWorkorderList = baseUrl + "/api/maintain/getBatchWorkorderList.api"; //据时间段批量获取列表数据
 export const Api_getWorkorderFullInfoList = baseUrl + "/api/maintain/getWorkorderFullInfoList.api"; //以工单号获取工单所有数据
+export const Api_getMachineList = baseUrl + "/api/device/getMachineList.api";//获取风机id数组
+export const Api_getEquipmentsTreeAndDetails = baseUrl + "/api/device/getEquipmentsTreeAndDetails.api"//获取风机详情信息
