@@ -41,7 +41,7 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
       const bufferCount = 1;//10的倍数
       const downloadCount = 10;
       const ids = machines.map(machine => machine.id);
-      let count = 0;
+      let count = 1;
       const maxRetryCount = 3;
       const retryInterval = 2000;
       const repeat$ = new Subject();
@@ -111,8 +111,8 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
               fanMachineInfo
             )values(?,?,?,?,?)`;
           machineDetails.forEach(ma => {
-            const values = [];
             ma.forEach(m => {
+              const values = [];
               values.push(m.id);
               values.push(m.machineId);
               values.push(JSON.stringify(m.deviceTree));
@@ -130,8 +130,7 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
     .do((res) => console.log('完成所有风机设备下载和缓存', res))
     .switchMap(actionLastSyncTimeCurServerTime => {
       const action = actionLastSyncTimeCurServerTime['actionAndLastSyncTime']['action'];
-      const serverTime = 0;
-      actionLastSyncTimeCurServerTime['curServerTime'];
+      const serverTime = actionLastSyncTimeCurServerTime['curServerTime'];
       return deps.db.executeSql(`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [serverTime, 1, action['type']]);
     })
     .switchMap(() => {
