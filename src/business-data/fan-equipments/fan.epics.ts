@@ -96,7 +96,7 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
             values.push(machine.machineTypeId);
             values.push(machine.projectId + "");
             values.push(machine.projectName);
-            values.push(machine.positionId);
+            values.push(machine.positionId+'');
             values.push(machine.areaCode);
             values.push(machine.areaName);
             values.push(machine.positionCode);
