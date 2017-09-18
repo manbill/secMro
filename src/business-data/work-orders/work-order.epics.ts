@@ -4,7 +4,6 @@ import { SELECT_PROJECT } from './../../project/project.actions';
 import { WorkOrder, ApiWorkorderBaseInfoDto } from './work-order.modal';
 import { Subject } from 'rxjs/Subject';
 import { MroError, generateMroError } from './../../app/mro-error-handler';
-import { MroResponse } from './../../common/mro-response';
 import { MroUtils } from './../../common/mro-util';
 import { AppState, EpicDependencies } from './../../app/app.reducer';
 import { tableNames } from './../../providers/db-operation/mro.tables';
@@ -13,6 +12,9 @@ import { Store, Action } from 'redux';
 import { ActionsObservable } from 'redux-observable';
 import 'rxjs/add/observable/from';
 import { fetchWorkOrderDataCompleted } from './work-order.actions';
+import { FETCH_FAULT_ORDER_DATA } from './fault-order/fault-order.actions';
+import { MroResponse } from '../../common/mro-response';
+import 'rxjs/add/operator/concatMap';
 
 export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   let currentServerTime = Date.now();
@@ -20,6 +22,7 @@ export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: S
   return action$.ofType(...BusinessDataSyncActions)
     .switchMap((action) => {
       actionType = action;
+      console.log('执行的工单下载动作',actionType);
       return deps.db.executeSql(`select * from ${tableNames.eam_sync_actions} where syncAction=?`, [action.type])
         .map(res => {
           let lastSyncSuccessTime = 0;
@@ -29,13 +32,13 @@ export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: S
           }
           return lastSyncSuccessTime;
         });
-    })
-    .switchMap(lastSyncSuccessTime => {
+    },(action,lastSyncSuccessTime)=>({action,lastSyncSuccessTime}))
+    .mergeMap(({action,lastSyncSuccessTime}) => {
       return deps.http.get(deps.mroApis.getCurServerTimeApi)
         .map((res: MroResponse) => res.data);
     }, (lastSyncSuccessTime, curServerTime) => ({ lastSyncSuccessTime, curServerTime }))
     .do((value) => console.log(value))
-    .switchMap(({ lastSyncSuccessTime, curServerTime }) => {
+    .mergeMap(({ lastSyncSuccessTime, curServerTime }) => {
       const loading = deps.loading.create();
       loading.setContent('正在下载工单...');
       loading.present();
@@ -44,11 +47,42 @@ export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: S
       const downloadCount = 5;//每次下载多少条工单详情数;
       const batchCount = 10;//每次批量处理的工单数，这里是downloadCount的倍数
       currentServerTime = curServerTime;
-      return deps.http.post(deps.mroApis.getBatchWorkorderListApi, {
-        workorderTypeString: BusinessDataSyncActionsEntities[actionType.type].workorderTypeString,//	工单类型(查询时// :pc端:37-风云工单,38-人工工单,39-工程工单,67-服务工单,68-整改/技改工单;手机端:4-scada工单；返回时，都是按照pc端的);传入空字符串，返回所有类型工单
-        startDate: lastSyncSuccessTime,
-        endDate: curServerTime,
-        projectId: store.getState().userState.projectState.selectedProject.projectId
+      return Observable.create(observer => {
+        if (actionType.type === FETCH_FAULT_ORDER_DATA) {//如果是故障工单
+          return deps.http.post(deps.mroApis.getBatchWorkorderListApi, {
+            workorderTypeString: '37',
+            startDate: lastSyncSuccessTime,
+            endDate: curServerTime,
+            projectId: store.getState().userState.projectState.selectedProject.projectId
+          })
+            .do(scada => console.log('风云系统', scada))
+            .switchMap((res) => {
+              return deps.http.post(deps.mroApis.getBatchWorkorderListApi, {
+                workorderTypeString: '38',
+                startDate: lastSyncSuccessTime,
+                endDate: curServerTime,
+                projectId: store.getState().userState.projectState.selectedProject.projectId
+              })
+                .do(manual => console.log('手工工单', manual))
+            }, (scada, manual) => ({ scada, manual }))
+            .do(({ scada, manual }) => console.log('所有的故障工单', scada['data'].concat(manual['data'])))
+            .map(({ scada, manual }) => {
+              const res = {
+                data: scada['data'].concat(manual['data']),
+                retCode: manual['retCode'],
+                retInfo: manual['retInfo']
+              }
+              return res;
+            })
+            .subscribe(observer);
+        }
+        deps.http.post(deps.mroApis.getBatchWorkorderListApi, {
+          workorderTypeString: BusinessDataSyncActionsEntities[actionType.type].workorderTypeString,//	工单类型(查询时// :pc端:37-风云工单,38-人工工单,39-工程工单,67-服务工单,68-整改/技改工单;手机端:4-scada工单；返回时，都是按照pc端的);传入空字符串，返回所有类型工单
+          startDate: lastSyncSuccessTime,
+          endDate: curServerTime,
+          projectId: store.getState().userState.projectState.selectedProject.projectId
+        })
+          .subscribe(observer);
       })
         .retryWhen(err$ =>
           Observable.range(0, maxRetryCount).zip(err$, (i, err) => ({ i, err }))
@@ -187,7 +221,7 @@ export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: S
         .finally(() => loading.dismiss());
     })
     .do(() => console.log('完成所有工单数据下载', actionType.type))
-    .switchMap(() => {
+    .mergeMap(() => {
       const sqls = [];
       return deps.db.executeSql(`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [currentServerTime, 1, actionType.type]);
     })

@@ -19,6 +19,7 @@ import { ReactiveFormsModule } from "@angular/forms";
 import { DbOperationProvider } from '../providers/db-operation/db-operation';
 import { MroApiProvider } from '../providers/mro-api/mro-api';
 import { HttpInterceptorModule } from "ng-http-interceptor";
+import { FaultOrderPageModule } from '../pages/fault-order/fault-order.module';
 @NgModule({
   declarations: [
     MyApp,
@@ -35,7 +36,8 @@ import { HttpInterceptorModule } from "ng-http-interceptor";
     ReactiveFormsModule,
     IonicModule.forRoot(MyApp),
     HttpInterceptorModule,
-    MaintenanceOrdersPageModule
+    MaintenanceOrdersPageModule,
+    FaultOrderPageModule,
   ],
   bootstrap: [IonicApp],
   entryComponents: [
