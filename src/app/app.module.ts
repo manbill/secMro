@@ -1,3 +1,4 @@
+import { FanEquipmentsPageModule } from './../pages/fan-equipments/fan-equipments.module';
 import { CreateFaultOrderPageModule } from './../pages/create-fault-order/create-fault-order.module';
 import { MaintenanceOrdersPageModule } from './../pages/maintenance-orders/maintenance-orders.module';
 import { InventoriesPage } from './../pages/inventories/inventories';
@@ -39,7 +40,8 @@ import { FaultOrderPageModule } from '../pages/fault-order/fault-order.module';
     HttpInterceptorModule,
     MaintenanceOrdersPageModule,
     FaultOrderPageModule,
-    CreateFaultOrderPageModule
+    CreateFaultOrderPageModule,
+    FanEquipmentsPageModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [

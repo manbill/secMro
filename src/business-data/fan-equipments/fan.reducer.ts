@@ -3,10 +3,23 @@ import { fetchMachinesEpic } from './fan.epics';
 import { combineEpics } from 'redux-observable';
 import { Action } from 'redux';
 import * as FanMachineActions from "./fan.actions";
-export interface FanMachineState  {
-
+export interface FanMachineState {
+  hasMoreData?: boolean;
+  ids: number[];
+  entities: {
+    [id: number]: FanMachine;
+  };
+  loadMoreDataCompleted?: boolean;
+  selectedFanMachineId: number;
+};
+const initState: FanMachineState = {
+  hasMoreData: true,
+  ids: [],
+  entities: {},
+  loadMoreDataCompleted: true,
+  selectedFanMachineId: null
 }
-export function FanMachineReducer(state: FanMachineState = null, action: Action): FanMachineState {
+export function FanMachineReducer(state: FanMachineState = initState, action: Action): FanMachineState {
   switch (action.type) {
     default:
       return {
