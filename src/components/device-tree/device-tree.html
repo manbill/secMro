@@ -1,4 +1,3 @@
 <!-- Generated template for the DeviceTreeComponent component -->
-<tree [data]='deviceTreeData' (change)="onDeviceNodeChange($event)">
-
+<tree [data]='deviceTreeData' [nodots]='false' [size]='"large"' [theme]='"dark"' (toggle)="toggle($event)" (change)="onDeviceNodeChange($event)">
 </tree>

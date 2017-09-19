@@ -42,8 +42,7 @@ import { FaultOrderPageModule } from '../pages/fault-order/fault-order.module';
     MaintenanceOrdersPageModule,
     FaultOrderPageModule,
     CreateFaultOrderPageModule,
-    FanEquipmentsPageModule,
-    MroComponentsModule
+    FanEquipmentsPageModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [

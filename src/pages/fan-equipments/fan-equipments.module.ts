@@ -1,3 +1,4 @@
+import { DeviceTreePageModule } from './../device-tree/device-tree.module';
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { FanEquipmentsPage } from './fan-equipments';
@@ -7,6 +8,7 @@ import { FanEquipmentsPage } from './fan-equipments';
   ],
   imports: [
     IonicPageModule.forChild(FanEquipmentsPage),
+    DeviceTreePageModule
   ],
 })
 export class FanEquipmentsPageModule {}

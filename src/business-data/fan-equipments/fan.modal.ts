@@ -56,15 +56,15 @@ export class FanMachine {
   workorderType: string;// null
   worktitle: string;// null
 }
-export class ChildDeviceTree {
-  childDeviceTrees: ChildDeviceTree[];
+export class DeviceTree {
+  childDeviceTrees: DeviceTree[];
   equipmentId: number;// 741330;
   equipmentName: string;//"机舱";
   machineId: string;
   parentId: number;// 0;
 }
 export class FanMachineEquipmentDetails {
-  deviceTree: ChildDeviceTree;
+  deviceTree: DeviceTree;
   equipmentId2EquipmentDetails: {
     [equipmentId: number]: FanMachine;
   };

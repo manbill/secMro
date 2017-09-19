@@ -3,7 +3,7 @@ import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
 import { MroUtils } from './../../common/mro-util';
 import { tableNames } from './../../providers/db-operation/mro.tables';
-import { FanMachine, FanMachineEquipmentDetails } from './fan.modal';
+import { FanMachine, FanMachineEquipmentDetails, DeviceTree } from './fan.modal';
 import { AppState, EpicDependencies } from './../../app/app.reducer';
 import { ActionsObservable } from 'redux-observable';
 import { Action, Store } from 'redux';
@@ -86,8 +86,9 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
             positionId,
             areaCode,
             areaName,
-            positionCode
-          )values(?,?,?,?,?,?,?,?,?,?)`;
+            positionCode,
+            fanMachineJson
+          )values(?,?,?,?,?,?,?,?,?,?,?)`;
           machines.forEach(machine => {
             const values = [];
             values.push(machine.id + "");
@@ -100,6 +101,7 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
             values.push(machine.areaCode);
             values.push(machine.areaName);
             values.push(machine.positionCode);
+            values.push(JSON.stringify(machine));
             sqls.push([insertMachineSql, values]);
           });
           sqls.push(`delete from ${tableNames.eam_sync_fan_machine_equipment_detail} where id in (${machineDetails.map(m => m.map(ma => ma.id))})`);
@@ -144,21 +146,75 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
       return Observable.throw(generateMroError(e));
     })
 }
-export const getMachineDetailInfoEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
-  return action$.ofType(FanMachineActions.GET_SELECTED_FAN_MACHINE_DETAIL_INFO)
+export const manualRefreshMachineListEpic=(action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies)=>{
+  return action$.ofType(FanMachineActions.MANUAL_REFRESH_FAN_MACHINE_LIST)
+  .mapTo(FanMachineActions.manualRefreshMachineDataCompleted());
+}
+export const getMachineFanDetailsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
+  return action$.ofType(FanMachineActions.GET_SELECTED_MACHINE_EQUIPMENT_DETAILS)
     .switchMap(() => {
       return deps.db.executeSql(`select * from ${tableNames.eam_sync_fan_machine_equipment_detail} where id=?`, [store.getState().businessDataState.fanMachineState.selectedFanMachineId])
         .map(MroUtils.changeDbRecord2Array)
         .map((res) => {
-          let fanMachineDetail: FanMachineEquipmentDetails;
-          if (res.length > 0) {
-            fanMachineDetail = JSON.parse(res[0]['equipmentsDetailsJson']);
+          let fanDetail: FanMachineEquipmentDetails = {
+            deviceTree: null,
+            equipmentId2EquipmentDetails: {},
+            id: null,
+            machineDTO: null,
+            machineId: null
           };
-          console.log('获取风机详情信息成功', fanMachineDetail);
-          return FanMachineActions.getMachineDetailInfoCompleted(fanMachineDetail);
-        })
+          if (res.length > 0) {
+            fanDetail.deviceTree = JSON.parse(res[0]['equipmentTreeJson']);
+            fanDetail.equipmentId2EquipmentDetails = JSON.parse(res[0]['equipmentsDetailsJson']);
+            fanDetail.id = res[0].id;
+            fanDetail.machineId = res[0].machineId;
+            fanDetail.machineDTO = JSON.parse(res[0]['fanMachineInfo']);
+
+          };
+          console.log('获取风机详情信息成功', fanDetail);
+          return FanMachineActions.getFanMachineEquipmentDetailsCompleted(fanDetail);
+        });
     })
     .catch(e => {
+      console.error(e);
+      return Observable.throw(generateMroError(e));
+    })
+}
+export const selectMachineEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
+  return action$.ofType(FanMachineActions.SELECT_MACHINE)
+    .mapTo(FanMachineActions.getFanMachineEquipmentDetails());
+}
+export const loadMoreMachinesEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
+  return action$.ofType(FanMachineActions.LOAD_MORE_MACHINE_DATA)
+    .switchMap((action) => {
+      const searchParams = (<FanMachineActions.LoadMoreMachineDataAction>action).searchParams;
+      const skipRecords = ((searchParams.pageNumber || 1) - 1) * deps.pagination;
+      let where = '';
+      const values = [];
+      if (MroUtils.isNotEmpty(searchParams.ids)) {
+        where += ` and id in (${searchParams.ids})`;
+      }
+      if (MroUtils.isNotEmpty(searchParams.machineId)) {
+        where += ` and machineId like ?`;
+        values.push(`%${searchParams.machineId}%`);
+      }
+      if (MroUtils.isNotEmpty(searchParams.positionCode)) {
+        where += ` and positionCode = ?`;
+        values.push(searchParams.positionCode);
+      }
+      where += ` order by positionCode limit ?,${deps.pagination}`;
+      values.push(skipRecords);
+      const sql = `select fanMachineJson from ${tableNames.eam_sync_fan_machine_equipment} where 1=1 ${where}`;
+      console.log(sql, values);
+      return deps.db.executeSql(sql, values)
+        .map(res=>{
+          const results = MroUtils.changeDbRecord2Array(res);
+          return results.map(r=>JSON.parse(r['fanMachineJson']));
+        })
+    })
+    .do(res=>console.log('筛选结果',res))
+    .map(res=>FanMachineActions.loadMoreFanMachineDataCompleted(res))
+    .catch(e=>{
       console.error(e);
       return Observable.throw(generateMroError(e));
     })

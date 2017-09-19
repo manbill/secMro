@@ -14,5 +14,18 @@
 
 
 <ion-content padding>
-
+  <ion-refresher (ionRefresh)="refreshMachineList($event)">
+    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="下拉刷新" refreshingSpinner="circles" refreshingText="正在刷新数据...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <ion-list>
+    <button ion-item *ngFor="let machine of machines" (click)="onSelectFanMachine(machine)">
+      <h3>机位号:{{machine.positionCode}}</h3>
+      <h4>风机ID:{{machine.machineId}}</h4>
+    </button>
+  </ion-list>
+  <ion-infinite-scroll (ionInfinite)="loadMoreMachines($event)">
+    <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="加载更多数据...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 </ion-content>

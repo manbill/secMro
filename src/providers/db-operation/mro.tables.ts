@@ -194,6 +194,7 @@ export const SqlVersions: SqlVersion[] = [
         areaCode text,
         areaName text,
         positionCode text,
+        fanMachineJson text,
         primary key (id)
       )`,
       `create table if not exists ${tableNames.eam_sync_fan_machine_equipment_detail}(

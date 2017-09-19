@@ -1,3 +1,4 @@
+import { FanEquipmentsPage } from './../fan-equipments/fan-equipments';
 import { InventoriesPage } from './../inventories/inventories';
 import { InitUserStateAction, initUserState } from './../../user/user.actions';
 import { LoginPage } from './../login/login';
@@ -40,6 +41,7 @@ export class TabsPage implements OnInit, OnDestroy {
   homeRoot = HomePage;
   aboutRoot = AboutPage;
   contactRoot = InventoriesPage;
+  fanEquipment=FanEquipmentsPage;
   projectName: string;
   companyName: string;
   constructor(private navCtrl: NavController, private sqlite: DbOperationProvider, @Inject(AppStore) private store: Store<AppState>) {
