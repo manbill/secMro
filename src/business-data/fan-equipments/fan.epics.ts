@@ -96,7 +96,7 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
             values.push(machine.machineTypeId);
             values.push(machine.projectId + "");
             values.push(machine.projectName);
-            values.push(machine.positionId+'');
+            values.push(machine.positionId + '');
             values.push(machine.areaCode);
             values.push(machine.areaName);
             values.push(machine.positionCode);
@@ -117,7 +117,7 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
               values.push(m.machineId);
               values.push(JSON.stringify(m.deviceTree));
               values.push(JSON.stringify(m.equipmentId2EquipmentDetails));
-              values.push(m.machineDTO);
+              values.push(JSON.stringify(m.machineDTO));
               sqls.push([insertDetailSql, values]);
             })
           })
@@ -139,6 +139,25 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
         .do((r) => console.log(`下载完成，从数据库中获取${deps.pagination}条数据`, r));
     })
     .map((machines: FanMachine[]) => FanMachineActions.fetchFanMachineDataCompleted(machines))
+    .catch(e => {
+      console.error(e);
+      return Observable.throw(generateMroError(e));
+    })
+}
+export const getMachineDetailInfoEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
+  return action$.ofType(FanMachineActions.GET_SELECTED_FAN_MACHINE_DETAIL_INFO)
+    .switchMap(() => {
+      return deps.db.executeSql(`select * from ${tableNames.eam_sync_fan_machine_equipment_detail} where id=?`, [store.getState().businessDataState.fanMachineState.selectedFanMachineId])
+        .map(MroUtils.changeDbRecord2Array)
+        .map((res) => {
+          let fanMachineDetail: FanMachineEquipmentDetails;
+          if (res.length > 0) {
+            fanMachineDetail = JSON.parse(res[0]['equipmentsDetailsJson']);
+          };
+          console.log('获取风机详情信息成功', fanMachineDetail);
+          return FanMachineActions.getMachineDetailInfoCompleted(fanMachineDetail);
+        })
+    })
     .catch(e => {
       console.error(e);
       return Observable.throw(generateMroError(e));

@@ -1,5 +1,6 @@
-import { FanMachine } from './fan.modal';
-import { fetchMachinesEpic } from './fan.epics';
+import { AppState } from './../../app/app.reducer';
+import { FanMachine, FanMachineEquipmentDetails } from './fan.modal';
+import { fetchMachinesEpic, getMachineDetailInfoEpic } from './fan.epics';
 import { combineEpics } from 'redux-observable';
 import { Action } from 'redux';
 import * as FanMachineActions from "./fan.actions";
@@ -11,13 +12,19 @@ export interface FanMachineState {
   };
   loadMoreDataCompleted?: boolean;
   selectedFanMachineId: number;
+  selectedFanMachineDetail: FanMachineEquipmentDetails;
+  selectedDeviceEntity: {
+    [deviceId: number]: string;
+  };
 };
 const initState: FanMachineState = {
   hasMoreData: true,
   ids: [],
   entities: {},
   loadMoreDataCompleted: true,
-  selectedFanMachineId: null
+  selectedFanMachineId: null,
+  selectedFanMachineDetail: null,
+  selectedDeviceEntity: null
 }
 export function FanMachineReducer(state: FanMachineState = initState, action: Action): FanMachineState {
   switch (action.type) {
@@ -25,6 +32,14 @@ export function FanMachineReducer(state: FanMachineState = initState, action: Ac
       return {
         ...state
       }
+    case FanMachineActions.GET_SELECTED_FAN_MACHINE_DETAIL_INFO_COMPLETED: {
+      const detail = (<FanMachineActions.GetMachineDetailInfoCompletedAction>action).machineDetail;
+      return {
+        ...state,
+        selectedFanMachineDetail: detail
+      }
+    }
+    case FanMachineActions.AUTO_REFRESH_FAN_MACHINE_LIST_COMPLETED:
     case FanMachineActions.FETCH_FAN_MACHINE_EQUIPMENTS_DATA_COMPLETED: {
       const machines = (<FanMachineActions.FetchFanMachineDataCompletedAction>action).machines;
       return {
@@ -37,4 +52,10 @@ export function FanMachineReducer(state: FanMachineState = initState, action: Ac
     }
   }
 }
-export const RootFanMachineEpic = combineEpics(fetchMachinesEpic);
+export function getMachineDetailInfo(state: AppState): FanMachineEquipmentDetails {
+  return state.businessDataState.fanMachineState.selectedFanMachineDetail;
+}
+export function getMachinesFromState(state: AppState): FanMachine[] {
+  return state.businessDataState.fanMachineState.ids.map(id => state.businessDataState.fanMachineState.entities[id]);
+}
+export const RootFanMachineEpic = combineEpics(fetchMachinesEpic, getMachineDetailInfoEpic);

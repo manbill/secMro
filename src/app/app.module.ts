@@ -1,3 +1,4 @@
+import { MroComponentsModule } from './../components/components.module';
 import { FanEquipmentsPageModule } from './../pages/fan-equipments/fan-equipments.module';
 import { CreateFaultOrderPageModule } from './../pages/create-fault-order/create-fault-order.module';
 import { MaintenanceOrdersPageModule } from './../pages/maintenance-orders/maintenance-orders.module';
@@ -41,7 +42,8 @@ import { FaultOrderPageModule } from '../pages/fault-order/fault-order.module';
     MaintenanceOrdersPageModule,
     FaultOrderPageModule,
     CreateFaultOrderPageModule,
-    FanEquipmentsPageModule
+    FanEquipmentsPageModule,
+    MroComponentsModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
