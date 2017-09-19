@@ -13,7 +13,7 @@ export const WorkOrderStateReducer = combineReducers({
   faultOrderState: FaultOrderReducer
 });
 export const RootWorkOrderEpics = combineEpics(fetchWorkOrderEpics, RootFaultOrderEpics);
-export interface IBusinessDataBaseState {
+export interface IBusinessWorkOrderDataBaseState {
   hasMoreData: boolean;
   loadMoreDataCompleted: boolean;
   refreshCompleted: boolean;

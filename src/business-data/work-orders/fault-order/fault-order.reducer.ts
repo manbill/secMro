@@ -1,12 +1,12 @@
 import { combineEpics } from 'redux-observable';
 import { Action } from 'redux';
-import { IBusinessDataBaseState } from './../work-orders.reducer';
+import { IBusinessWorkOrderDataBaseState } from './../work-orders.reducer';
 import { WorkOrder } from '../work-order.modal';
 import * as FaultOrderActions from "./fault-order.actions";
 import { manualRefreshFaultOrderListEpic, autoRefreshFaultOrderListEpic, updateSelectedFaultOrderEpic, loadMoreFaultOrdersEpic, createFaultOrderEpic } from './fault-order.epics';
 import { LOAD_MORE_FAULT_ORDER_DATA, LOAD_MORE_FAULT_ORDER_DATA_COMPLETED } from './fault-order.actions';
 import { AppState } from '../../../app/app.reducer';
-export interface FaultOrderState extends IBusinessDataBaseState {
+export interface FaultOrderState extends IBusinessWorkOrderDataBaseState {
   createFaultOrderCompleted: boolean;
 }
 const initState: FaultOrderState = {

@@ -1,10 +1,10 @@
 import { FanMachine } from './fan.modal';
 import { fetchMachinesEpic } from './fan.epics';
 import { combineEpics } from 'redux-observable';
-import { IBusinessDataBaseState } from './../work-orders/work-orders.reducer';
 import { Action } from 'redux';
 import * as FanMachineActions from "./fan.actions";
-export interface FanMachineState extends IBusinessDataBaseState {
+export interface FanMachineState  {
+
 }
 export function FanMachineReducer(state: FanMachineState = null, action: Action): FanMachineState {
   switch (action.type) {
