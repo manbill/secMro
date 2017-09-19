@@ -146,9 +146,18 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
       return Observable.throw(generateMroError(e));
     })
 }
-export const manualRefreshMachineListEpic=(action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies)=>{
+export const manualRefreshMachineListEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(FanMachineActions.MANUAL_REFRESH_FAN_MACHINE_LIST)
-  .mapTo(FanMachineActions.manualRefreshMachineDataCompleted());
+    .switchMap(() => {
+      let where = ` order by positionCode limit 0,${deps.pagination}`;
+      return deps.db.executeSql(`select fanMachineJson from ${tableNames.eam_sync_fan_machine_equipment} ${where}`)
+        .map(res => {
+          const results = MroUtils.changeDbRecord2Array(res);
+          return results.map(r => JSON.parse(r['fanMachineJson']));
+        })
+    })
+    .do((res)=>console.log(res))
+    .map(FanMachineActions.manualRefreshMachineDataCompleted);
 }
 export const getMachineFanDetailsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(FanMachineActions.GET_SELECTED_MACHINE_EQUIPMENT_DETAILS)
@@ -207,14 +216,14 @@ export const loadMoreMachinesEpic = (action$: ActionsObservable<Action>, store: 
       const sql = `select fanMachineJson from ${tableNames.eam_sync_fan_machine_equipment} where 1=1 ${where}`;
       console.log(sql, values);
       return deps.db.executeSql(sql, values)
-        .map(res=>{
+        .map(res => {
           const results = MroUtils.changeDbRecord2Array(res);
-          return results.map(r=>JSON.parse(r['fanMachineJson']));
+          return results.map(r => JSON.parse(r['fanMachineJson']));
         })
     })
-    .do(res=>console.log('筛选结果',res))
-    .map(res=>FanMachineActions.loadMoreFanMachineDataCompleted(res))
-    .catch(e=>{
+    .do(res => console.log('筛选结果', res))
+    .map(res => FanMachineActions.loadMoreFanMachineDataCompleted(res))
+    .catch(e => {
       console.error(e);
       return Observable.throw(generateMroError(e));
     })

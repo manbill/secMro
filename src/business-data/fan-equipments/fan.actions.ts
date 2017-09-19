@@ -44,9 +44,10 @@ export function autoRefreshMachineListCompleted(machines: FanMachine[]): FetchFa
     machines: machines
   }
 }
-export function manualRefreshMachineDataCompleted(): Action {
+export function manualRefreshMachineDataCompleted(machines: FanMachine[]): FetchFanMachineDataCompletedAction {
   return {
-    type: MANUAL_REFRESH_FAN_MACHINE_LIST_COMPLETED
+    type: MANUAL_REFRESH_FAN_MACHINE_LIST_COMPLETED,
+    machines
   }
 }
 export interface MachineSearchParams extends BaseSearchParams {

@@ -72,7 +72,7 @@ export class FanEquipmentsPage {
       if (this.store.getState().businessDataState.fanMachineState.loadMoreDataCompleted) {
         infiniteScroll.complete();
       }
-      infiniteScroll.enable(this.store.getState().businessDataState.fanMachineState.hasMoreData);
+      infiniteScroll.enable(!!this.store.getState().businessDataState.fanMachineState.hasMoreData);
     });
     this.searchParams.pageNumber++;
     this.store.dispatch(FanMachineActions.loadMoreFanMachineData(this.searchParams));

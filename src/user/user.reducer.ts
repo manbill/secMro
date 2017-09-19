@@ -42,7 +42,7 @@ export function LastLoginTimeReducer(state: number = Date.now(), action: Action)
     }
   }
 }
-export const TokenReducer = (state: boolean = false, action: Action): boolean => {
+export const TokenReducer = (state: boolean =   false, action: Action): boolean => {
   switch (action.type) {
     default: {
       return state;
