@@ -102,7 +102,7 @@ export class DeviceTreeComponent {
             disabled: false,
             loading: false,
             highlighted: false,
-            openable: deviceTree.childDeviceTrees.length > 0,
+            openable: deviceTree.childDeviceTrees&&deviceTree.childDeviceTrees.length > 0,
             dropPosition: 0,
             dropAllowed: false,
           },
