@@ -147,6 +147,7 @@ export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: S
       console.error(e);
       return Observable.throw(generateMroError(e));
     })
+    .do((res)=>console.log(res))
 }
 export function upsertWorkOrders(detailInfos: Array<WorkOrder[]>, db: DbOperationProvider): Observable<any> {
   const sqls = [];

@@ -38,7 +38,7 @@ export const RootEpics = combineEpics(RootUserEpics, errorHandleEpic, RootWareho
 const isLoginAsPerTime = (state: AppState) => {//不是同一天，需要重新登录
   // console.log('moment(state.userState.lastLoginTime)',moment(state.userState.lastLoginTime).date());
   // console.log('moment().date()', moment().date());
-  return moment(state.userState.lastLoginTime).date() !== moment().date();
+  return moment(state.userState.lastLoginState.lastLoginTime).date() !== moment().date();
 }
 const allBaseDataCompleted = (state: AppState) => {
   return Object.keys(state.baseDataState).every((baseState) => {

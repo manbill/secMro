@@ -50,12 +50,6 @@ export function FanMachineReducer(state: FanMachineState = initState, action: Ac
         refreshDataCompleted: false
       }
     }
-    case FanMachineActions.MANUAL_REFRESH_FAN_MACHINE_LIST_COMPLETED: {
-      return {
-        ...state,
-        refreshDataCompleted: true
-      }
-    }
     case FanMachineActions.LOAD_MORE_MACHINE_DATA: {
       return {
         ...state,
@@ -93,15 +87,17 @@ export function FanMachineReducer(state: FanMachineState = initState, action: Ac
         hasMoreData: machines.length !== 0
       }
     }
-    case FanMachineActions.AUTO_REFRESH_FAN_MACHINE_LIST_COMPLETED:
-    case FanMachineActions.FETCH_FAN_MACHINE_EQUIPMENTS_DATA_COMPLETED: {
+    case FanMachineActions.MANUAL_REFRESH_FAN_MACHINE_LIST_COMPLETED:
+    case FanMachineActions.FETCH_FAN_MACHINE_EQUIPMENTS_DATA_COMPLETED:
+    case FanMachineActions.AUTO_REFRESH_FAN_MACHINE_LIST_COMPLETED: {
       const machines = (<FanMachineActions.FetchFanMachineDataCompletedAction>action).machines;
       return {
         ...state,
         ids: machines.map(m => m.id),
         entities: machines.reduce((e, m) => { e[m.id] = m; return e; }, {}),
         hasMoreData: machines.length !== 0,
-        loadMoreDataCompleted: true
+        loadMoreDataCompleted: true,
+        refreshDataCompleted: true
       }
     }
   }
@@ -115,4 +111,4 @@ export function getSelectedMachine(state: AppState): FanMachine {
 export function getMachines(state: AppState): FanMachine[] {
   return state.businessDataState.fanMachineState.ids.map(id => state.businessDataState.fanMachineState.entities[id]);
 }
-export const RootFanMachineEpic = combineEpics(fetchMachinesEpic,manualRefreshMachineListEpic, selectMachineEpic,getMachineFanDetailsEpic,loadMoreMachinesEpic);
+export const RootFanMachineEpic = combineEpics(fetchMachinesEpic, manualRefreshMachineListEpic, selectMachineEpic, getMachineFanDetailsEpic, loadMoreMachinesEpic);

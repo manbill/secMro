@@ -4,7 +4,7 @@ import { InitUserStateAction, initUserState } from './../../user/user.actions';
 import { LoginPage } from './../login/login';
 import { MroUtils } from './../../common/mro-util';
 import { UserState } from './../../user/user.reducer';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, Tab } from 'ionic-angular';
 import { AppStore } from './../../app/app.store';
 import { Store, Unsubscribe, Action } from 'redux';
 import { AppState } from './../../app/app.reducer';
@@ -25,27 +25,26 @@ export class TabsPage implements OnInit, OnDestroy {
     this.unsubscribe && this.unsubscribe();
   }
   ngOnInit(): void {
-    console.log("ngOnInit")
-    //执行未完成的同步函数
-    this.sqlite.executeSql(`select * from ${tableNames.eam_sync_actions} where syncStatus=?`, [0])
-      .map(res => MroUtils.changeDbRecord2Array(res))
-      .do((actions) => console.log('尚未完成的actions: ', actions))
-      .map((actions) => {
-        actions.map((action) => {
-          this.store.dispatch({ type: eamSyncActionEntities[action['syncAction']] });
-        });
-      })
-      .subscribe();
+    console.log("ngOnInit");
+  }
+  ionViewDidLoad() {
   }
   unsubscribe: Unsubscribe;
   homeRoot = HomePage;
   aboutRoot = AboutPage;
   contactRoot = InventoriesPage;
-  fanEquipment=FanEquipmentsPage;
+  fanEquipment = FanEquipmentsPage;
   projectName: string;
   companyName: string;
   constructor(private navCtrl: NavController, private sqlite: DbOperationProvider, @Inject(AppStore) private store: Store<AppState>) {
     console.log("TabsPage,constructor");
-
+  }
+  onTabsChanged(tab: Tab) {
+    // console.log(tab.index)
+    if (tab.index === 0) {
+      tab.goToRoot({
+        keyboardClose: true
+      })
+    }
   }
 }

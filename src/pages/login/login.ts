@@ -1,3 +1,4 @@
+import { Platform } from 'ionic-angular';
 import { MroUtils } from './../../common/mro-util';
 import { SelectCompanyProjectPage } from './../select-company-project/select-company-project';
 import { User } from './../../user/user.modal';
@@ -41,6 +42,7 @@ export class LoginPage {
   constructor(private navCtrl: NavController,
     private fb: FormBuilder,
     private http: Http,
+    private plt: Platform,
     @Inject(AppStore) private store: Store<AppState>,
     public navParams: NavParams) {
     this.createForm();
@@ -56,21 +58,18 @@ export class LoginPage {
       {
         userName: this.loginForm.get('userName').value,
         password: this.loginForm.get('password').value,
-        deviceFlag: 2
+        deviceFlag: this.plt.is('ios') ? 1 : 2
       }
     )
     );
-    this.unsubscription = this.store.subscribe(() => {
-      //do nothing;
-    });
     //登录用户改变，或者是尚未选择项目
-    if(this.store.getState().userState.currentUser&&
-      this.store.getState().userState.currentUser.id!==MroUtils.getLastLoginUserId()
-    || !this.store.getState().userState.projectState.selectedProject
-    ){
+    if (this.store.getState().userState.currentUser &&
+      this.store.getState().userState.currentUser.id !== MroUtils.getLastLoginUserId()
+      || !this.store.getState().userState.projectState.selectedProject
+    ) {
       console.log('重新选择项目')
       this.navCtrl.push(SelectCompanyProjectPage);
-      return ;
+      return;
     }
     this.navCtrl.push(TabsPage);//跳转到首页
   }
@@ -79,7 +78,12 @@ export class LoginPage {
   }
   ionViewDidLeave() {
     console.log('ionViewDidLeave LoginPage');
-    this.unsubscription&&this.unsubscription();
-  }
 
+  }
+  ngOnDestroy() {
+    //Called once, before the instance is destroyed.
+    //Add 'implements OnDestroy' to the class.
+    console.log('loginPage destroy')
+    this.unsubscription && this.unsubscription();
+  }
 }

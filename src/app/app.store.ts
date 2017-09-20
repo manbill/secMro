@@ -22,7 +22,7 @@ export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loadi
     mroApis: api.mroApiEntities,
     alterCtrl: alterCtrl,
     errorHandler: errorHandler,
-    pagination:MroUtils.PAGINATION//列表每次展示的条目数量
+    pagination: MroUtils.PAGINATION//列表每次展示的条目数量
   };
   const store: Store<AppState> = createStore(RootReducer, composeEnhancer(
     applyMiddleware(
@@ -34,7 +34,7 @@ export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loadi
     // console.debug(data)
     const url: string = data[0];
     const reqOpts: RequestOptions = data[2];
-    if (method.toLowerCase() === 'post' && url && url.includes('/api')) {
+    if (method.toLowerCase() === 'post' && url && url.includes('/api') && url !== api.mroApiEntities.loginApi) {
       data[2] = Object.assign({}, reqOpts, MroUtils.generatePostReqArgs(store.getState().userState.currentUser.token));
     };
     if (method.toLowerCase() === 'get' && url && url.includes('/api')) {
@@ -60,11 +60,13 @@ export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loadi
         if (r.json().retCode === '10008') {
           let err = new MroError(MroErrorCode.token_invalid_error_code, 'token失效，请重新登录', r.json().retInfo);
           // errorHandler.handleError(err);
-          store.dispatch(tokenInvalid());
+          if (store.getState().userState.tokenState.isTokenValid) {
+            store.dispatch(tokenInvalid());
+          }
           throw (err);
         }
         if (r.json().retCode !== '00000') {
-          let err = new MroError(MroErrorCode.token_invalid_error_code, 'token失效，请重新登录', r.json().retInfo|| "网络请求失败!");
+          let err = new MroError(MroErrorCode.token_invalid_error_code, 'token失效，请重新登录', r.json().retInfo || "网络请求失败!");
           throw (err);
         }
         return r.json();

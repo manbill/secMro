@@ -66,7 +66,6 @@ export class FaultOrderPage {
     this.searchForm.setValue(this.searchParams);
     console.log(this.searchForm.value);
     console.log('ionViewDidLoad FaultOrderPage', this.searchForm.value);
-    this.store.dispatch(loadMoreFaultOrders(this.searchForm.value));
   }
   ionViewDidLeave() {
     this.faultOrdersUnsbuscribe();

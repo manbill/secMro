@@ -35,20 +35,17 @@ export class FanEquipmentsPage {
       ids: [],
       positionCode: null
     }
+    this.unsubscribe = store.subscribe(() => {
+      this.machines = getMachines(this.store.getState());
+      console.log(this.machines);
+    });
   }
   ngOnInit() {
-    this.unsubscribe = this.store.subscribe(() => {
-      this.machines = getMachines(this.store.getState());
-      console.log(this.machines, NgZone.isInAngularZone());
-    });
     this.store.dispatch(FanMachineActions.fetchFanMachineData());
     this.store.dispatch(FanMachineActions.manualRefreshMachineList());
-    this.searchParams.pageNumber = 1;
-    this.store.dispatch(FanMachineActions.loadMoreFanMachineData(this.searchParams));
   }
   ionViewDidLoad() {
     console.log('ionViewDidLoad FanEquipmentsPage');
-
   }
   onSelectFanMachine(machine: FanMachine) {
     this.store.dispatch(FanMachineActions.selectMachine(machine))
@@ -65,23 +62,23 @@ export class FanEquipmentsPage {
     this.searchParams.machineId = null;
     this.searchParams.pageNumber = 1;
     this.searchParams.positionCode = null;
-    this.store.dispatch(FanMachineActions.loadMoreFanMachineData(this.searchParams));
   }
   loadMoreMachines(infiniteScroll: InfiniteScroll) {
+    this.searchParams.pageNumber++;
     this.loadMoreUnsubscribe = this.store.subscribe(() => {
       if (this.store.getState().businessDataState.fanMachineState.loadMoreDataCompleted) {
         infiniteScroll.complete();
       }
       infiniteScroll.enable(!!this.store.getState().businessDataState.fanMachineState.hasMoreData);
     });
-    this.searchParams.pageNumber++;
+    console.log('风机设备,searchParams', this.searchParams);
     this.store.dispatch(FanMachineActions.loadMoreFanMachineData(this.searchParams));
   }
   ngOnDestroy() {
     //Called once, before the instance is destroyed.
     //Add 'implements OnDestroy' to the class.
     this.unsubscribe();
-    this.loadMoreUnsubscribe&&this.loadMoreUnsubscribe();
-    this.refreshUnsubscribe&&this.refreshUnsubscribe();
+    this.loadMoreUnsubscribe && this.loadMoreUnsubscribe();
+    this.refreshUnsubscribe && this.refreshUnsubscribe();
   }
 }

@@ -140,7 +140,7 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
         .map(MroUtils.changeDbRecord2Array)
         .do((r) => console.log(`下载完成，从数据库中获取${deps.pagination}条数据`, r));
     })
-    .map((machines: FanMachine[]) => FanMachineActions.fetchFanMachineDataCompleted(machines))
+    .map((machines: FanMachine[] ) => FanMachineActions.fetchFanMachineDataCompleted(machines))
     .catch(e => {
       console.error(e);
       return Observable.throw(generateMroError(e));
@@ -157,7 +157,7 @@ export const manualRefreshMachineListEpic = (action$: ActionsObservable<Action>,
         })
     })
     .do((res)=>console.log(res))
-    .map(FanMachineActions.manualRefreshMachineDataCompleted);
+    .map(res=>FanMachineActions.manualRefreshMachineDataCompleted(res));
 }
 export const getMachineFanDetailsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(FanMachineActions.GET_SELECTED_MACHINE_EQUIPMENT_DETAILS)

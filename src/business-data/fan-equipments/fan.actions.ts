@@ -47,13 +47,13 @@ export function autoRefreshMachineListCompleted(machines: FanMachine[]): FetchFa
 export function manualRefreshMachineDataCompleted(machines: FanMachine[]): FetchFanMachineDataCompletedAction {
   return {
     type: MANUAL_REFRESH_FAN_MACHINE_LIST_COMPLETED,
-    machines
+    machines: machines
   }
 }
 export interface MachineSearchParams extends BaseSearchParams {
   positionCode: null;//机位号
   machineId: null;//风机ID
-  ids?:number[];//根据id查询
+  ids?: number[];//根据id查询
 }
 export interface LoadMoreMachineDataAction extends Action {
   searchParams: MachineSearchParams

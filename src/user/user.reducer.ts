@@ -1,3 +1,5 @@
+import { not } from 'ramda';
+import { TokenState } from './user.reducer';
 import { Project } from './../project/project.modal';
 import { AppState } from './../app/app.reducer';
 import { RootCompanyEpics } from './../company/company.reducer';
@@ -13,48 +15,81 @@ export interface UserState {
   projectState: ProjectState;
   companyState: CompanyState;
   currentUser: User;
-  lastLoginTime: number;
-  isTokenValid: boolean
+  lastLoginState: LastLoginState;
+  tokenState: TokenState
 }
 export function UserReducer(state: User = null, action: Action): User {
   switch (action.type) {
     default: {
       return state;
     }
+    case UserActions.LOGIN_ACTION: {
+      const loginInfo = (<UserActions.LoginAction>action).userInfo
+      return {
+        ...state,
+        token: null,
+        name: loginInfo.userName,
+        password: loginInfo.password,
+        list: []
+      }
+    }
     case UserActions.LOGIN_SUCCESS: {
-      return (<UserActions.LoginSuccessAction>action).user
+      return {
+        ...state,
+        ...((<UserActions.LoginSuccessAction>action).user)
+      }
     }
     case UserActions.INIT_USER_STATE: {
-      return (<UserActions.InitUserStateAction>action).userState.currentUser || state;
+      return {
+        ...state,
+        ...((<UserActions.InitUserStateAction>action).userState.currentUser)
+      };
     }
   }
 }
-export function LastLoginTimeReducer(state: number = Date.now(), action: Action): number {
+export interface LastLoginState {
+  lastLoginTime: number;
+}
+export function LastLoginTimeReducer(state: LastLoginState = {
+  lastLoginTime: 0
+}, action: Action): LastLoginState {
   switch (action.type) {
     default: {
       return state;
     }
     case UserActions.LOGIN_SUCCESS: {
-      return moment.now();
+      return {
+        ...state,
+        lastLoginTime: Date.now()
+      }
     }
     case UserActions.INIT_USER_STATE: {
-      return (<UserActions.InitUserStateAction>action).userState.lastLoginTime;
+      return (<UserActions.InitUserStateAction>action).userState.lastLoginState;
     }
   }
 }
-export const TokenReducer = (state: boolean =   false, action: Action): boolean => {
+export interface TokenState {
+  isTokenValid: boolean
+}
+export const TokenReducer = (state: TokenState = null, action: Action): TokenState => {
   switch (action.type) {
     default: {
       return state;
     }
     case UserActions.INIT_USER_STATE: {
-      return (<UserActions.InitUserStateAction>action).userState.isTokenValid;
+      return (<UserActions.InitUserStateAction>action).userState.tokenState;
     }
     case UserActions.LOGIN_SUCCESS: {
-      return true;
+      return {
+        ...state,
+        isTokenValid: true
+      };
     }
     case UserActions.TOKEN_INVALID: {
-      return false;
+      return {
+        ...state,
+        isTokenValid: false
+      };
     }
   }
 }
@@ -62,8 +97,8 @@ export const UserRootReducer = combineReducers({
   projectState: ProjectReducer,
   companyState: CompanyReducer,
   currentUser: UserReducer,
-  lastLoginTime: LastLoginTimeReducer,
-  isTokenValid: TokenReducer
+  lastLoginState: LastLoginTimeReducer,
+  tokenState: TokenReducer
 });
 export const RootUserEpics = combineEpics(loginEpic, RootProjectEpics, RootCompanyEpics, setUserStateEpic);
 export function getUserSelectedProjectId(state: AppState): number {

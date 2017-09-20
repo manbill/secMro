@@ -26,7 +26,7 @@ import 'rxjs/add/observable/of';
 import { LoginPage } from '../pages/login/login';
 import { MroErrorCode, MroError } from "./mro-error-handler";
 import { initUserState } from "../user/user.actions";
-import { BusinessDataSyncActions} from '../business-data/business.actions';
+import { BusinessDataSyncActions } from '../business-data/business.actions';
 
 @Component({
   templateUrl: 'app.html'
@@ -100,8 +100,12 @@ export class MyApp implements OnInit, OnDestroy {
                     companyEntities: {}
                   },
                   currentUser: new User(),
-                  isTokenValid: false,
-                  lastLoginTime: 0,
+                  tokenState: {
+                    isTokenValid: false
+                  },
+                  lastLoginState: {
+                    lastLoginTime: 0
+                  },
                   projectState: {
                     ids: [],
                     projectEntities: {},
@@ -117,13 +121,13 @@ export class MyApp implements OnInit, OnDestroy {
           .subscribe(
           (userState) => {
             this.unsubscribe = this.store.subscribe(() => {
-              if (shouldLogin(this.store.getState()) || !this.store.getState().userState.isTokenValid) {
-                this.nav.push(LoginPage);
-                this.unsubscribe();
+              if (shouldLogin(this.store.getState()) || !this.store.getState().userState.tokenState.isTokenValid) {
+                this.nav.setRoot(LoginPage);
+                // this.unsubscribe();
               }
             });
             this.store.dispatch(initUserState(userState));
-            if (this.store.getState().userState.isTokenValid && !shouldLogin(this.store.getState())) {
+            if (this.store.getState().userState.tokenState.isTokenValid && !shouldLogin(this.store.getState())) {
               if (!MroUtils.isNotEmpty(this.store.getState().userState.projectState.selectedProject)) {
                 this.nav.push(SelectCompanyProjectPage);
               } else {

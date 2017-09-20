@@ -9,6 +9,37 @@ import { EventData, DropPosition, clearMarkerOfTree } from 'tree-component/commo
 import { getSelectedFanDetail } from '../../business-data/fan-equipments/fan.reducer';
 
 /**
+ *  = [{
+    text: 'root',
+    value: 'root',
+    state: {
+      openable: true,
+      opened: false,
+      selected: false,
+      disabled: false,
+      loading: false,
+      highlighted: false,
+      dropPosition: 0,
+      dropAllowed: true
+    },
+    children: [
+      {
+        text: 'root_node1',
+        value: 'node1',
+        state: {
+          opened: false,
+          selected: false,
+          disabled: false,
+          loading: false,
+          highlighted: false,
+          openable: false,
+          dropPosition: 0,
+          dropAllowed: true
+        },
+        children: []
+      }
+    ]
+  }];
  * Generated class for the DeviceTreeComponent component.
  *
  * See https://angular.io/docs/ts/latest/api/core/index/ComponentMetadata-class.html
@@ -20,13 +51,13 @@ import { getSelectedFanDetail } from '../../business-data/fan-equipments/fan.red
 })
 export class DeviceTreeComponent {
   deviceTreeUnsubscribe: Unsubscribe;
-  deviceTreeData: TreeData[];
+  deviceTreeData: TreeData[] = [];
   constructor( @Inject(AppStore) private store: Store<AppState>) {
     console.log('DeviceTreeComponent')
   }
-  toggle(data: EventData){
+  toggle(data: EventData) {
     console.log(data);
-    data.data.state.opened=!data.data.state.opened;
+    data.data.state.opened = !data.data.state.opened;
   }
   ngOnDestroy() {
     this.deviceTreeUnsubscribe && this.deviceTreeUnsubscribe();
@@ -45,7 +76,7 @@ export class DeviceTreeComponent {
             disabled: false,
             loading: false,
             highlighted: true,
-            openable: true,
+            openable: deviceTree.childDeviceTrees.length > 0,
             dropPosition: 0,
             dropAllowed: false,
           },
@@ -58,24 +89,24 @@ export class DeviceTreeComponent {
     })
   }
   getTreeData(deviceTrees: DeviceTree[]): Array<TreeData> {
-    let treeDatas: TreeData[]=null;
+    let treeDatas: TreeData[] = null;
     if (deviceTrees.length > 0) {
-      treeDatas=[];
+      treeDatas = [];
       deviceTrees.forEach((deviceTree) => {
         const node: TreeData = {
           text: deviceTree.equipmentName,
           value: deviceTree.equipmentId,
           state: {
-            opened: deviceTrees.length!==0,
+            opened: false,
             selected: false,
             disabled: false,
             loading: false,
             highlighted: false,
-            openable: deviceTrees.length!==0,
+            openable: deviceTrees.length > 0,
             dropPosition: 0,
             dropAllowed: false,
           },
-          children: deviceTree.childDeviceTrees.length!==0?this.getTreeData(deviceTree.childDeviceTrees):null,
+          children: this.getTreeData(deviceTree.childDeviceTrees),
           icon: 'home'
         }
         treeDatas.push(node);
@@ -84,8 +115,8 @@ export class DeviceTreeComponent {
     return treeDatas;
   }
   onDeviceNodeChange(data: EventData) {
-    console.log(data,data.data.value,data!.data);
-    data.data.state.highlighted=true;
+    console.log(data, data.data.value, data!.data);
+    data.data.state.highlighted = true;
     clearMarkerOfTree(data.data);
   }
 }

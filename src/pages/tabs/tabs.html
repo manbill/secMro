@@ -1,4 +1,4 @@
-<ion-tabs>
+<ion-tabs (ionChange)='onTabsChanged($event)'>
   <ion-tab [root]="homeRoot" tabTitle="Home" tabIcon="home"></ion-tab>
   <ion-tab [root]="aboutRoot" tabTitle="About" tabIcon="information-circle"></ion-tab>
   <ion-tab [root]="fanEquipment" tabTitle="风机设备" tabIcon="ios-search"></ion-tab>

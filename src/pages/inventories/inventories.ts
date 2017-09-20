@@ -54,6 +54,8 @@ export class InventoriesPage implements OnInit, OnDestroy {
       };
       if (!this.store.getState().baseDataState.materialState.hasMoreData) {
         infiniteScroll.enable(false);
+      }else{
+        infiniteScroll.enable(true);
       }
     });
     this.searchParams.pageNumber++;
