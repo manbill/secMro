@@ -89,9 +89,8 @@ export class DeviceTreeComponent {
     })
   }
   getTreeData(deviceTrees: DeviceTree[]): Array<TreeData> {
-    let treeDatas: TreeData[] = null;
+    let treeDatas: TreeData[] = [];
     if (deviceTrees.length > 0) {
-      treeDatas = [];
       deviceTrees.forEach((deviceTree) => {
         const node: TreeData = {
           text: deviceTree.equipmentName,
