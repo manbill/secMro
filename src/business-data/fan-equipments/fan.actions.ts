@@ -1,10 +1,8 @@
 import { BaseSearchParams } from './../../common/mro.search-params.modal';
 import { FanMachine, FanMachineEquipmentDetails, DeviceTree } from './fan.modal';
 import { Action } from 'redux';
-export const MANUAL_REFRESH_FAN_MACHINE_LIST = 'manual_refresh_fan_machine_list';
-export const AUTO_REFRESH_FAN_MACHINE_LIST = 'auto_refresh_fan_machine_list';
-export const AUTO_REFRESH_FAN_MACHINE_LIST_COMPLETED = 'auto_refresh_fan_machine_list_completed';
-export const MANUAL_REFRESH_FAN_MACHINE_LIST_COMPLETED = 'manual_refresh_fan_machine_list_completed';
+export const REFRESH_FAN_MACHINE_LIST = 'refresh_fan_machine_list';
+export const REFRESH_FAN_MACHINE_LIST_COMPLETED = 'refresh_fan_machine_list_completed';
 export const LOAD_MORE_MACHINE_DATA = 'LOAD_MORE_MACHINE_DATA';
 export const LOAD_MORE_MACHINE_DATA_COMPLETED = 'load_more_machine_data_completed';
 export const FETCH_FAN_MACHINE_EQUIPMENTS_DATA = 'fetch_fan_machine_equipments_data';
@@ -28,32 +26,20 @@ export function selectDeviceEquipment(machine: FanMachine): SelectMachineAction 
     machine
   }
 }
-export function manualRefreshMachineList(): Action {
+export function refreshMachineList(): Action {
   return {
-    type: MANUAL_REFRESH_FAN_MACHINE_LIST
+    type: REFRESH_FAN_MACHINE_LIST
   }
 }
-export function autoRefreshMachineList(): Action {
+export function refreshMachineListCompleted(): Action {
   return {
-    type: AUTO_REFRESH_FAN_MACHINE_LIST
-  }
-}
-export function autoRefreshMachineListCompleted(machines: FanMachine[]): FetchFanMachineDataCompletedAction {
-  return {
-    type: AUTO_REFRESH_FAN_MACHINE_LIST_COMPLETED,
-    machines: machines
-  }
-}
-export function manualRefreshMachineDataCompleted(machines: FanMachine[]): FetchFanMachineDataCompletedAction {
-  return {
-    type: MANUAL_REFRESH_FAN_MACHINE_LIST_COMPLETED,
-    machines: machines
+    type: REFRESH_FAN_MACHINE_LIST_COMPLETED,
   }
 }
 export interface MachineSearchParams extends BaseSearchParams {
   positionCode: null;//机位号
   machineId: null;//风机ID
-  ids?: number[];//根据id查询
+  ids?: number[];//根据id查询,通过这个参数，判断是否是自动刷新还是手动刷新
 }
 export interface LoadMoreMachineDataAction extends Action {
   searchParams: MachineSearchParams

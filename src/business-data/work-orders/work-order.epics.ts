@@ -92,8 +92,8 @@ export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: S
             })
         )
         .map((res: MroResponse) => res.data)
-        .do(res => console.log("需要下载的工单数据", res))
-        .switchMap((orders: ApiWorkorderBaseInfoDto[]) => {
+        .do(res => console.log(`需要下载的${actionAndLastSyncTime['action'].type} 数据`, res))
+        .mergeMap((orders: ApiWorkorderBaseInfoDto[]) => {
           if (orders.length === 0) {
             return Observable.empty();
           }
@@ -105,7 +105,7 @@ export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: S
           let fullInfoParams = params.splice(0, downloadCount);
           return Observable.empty().startWith('fetchOrdersDetailInfo')
             .do(() => console.log(fullInfoParams))
-            .switchMap(() => {
+            .mergeMap(() => {
               return deps.http.post(deps.mroApis.getWorkorderFullInfoListApi, { apiWorkorderBaseInfoDto: fullInfoParams })
                 .retryWhen(err$ =>
                   Observable.range(0, maxRetryCount).zip(err$, (i, err) => ({ i, err }))
@@ -147,7 +147,7 @@ export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: S
       console.error(e);
       return Observable.throw(generateMroError(e));
     })
-    .do((res)=>console.log(res))
+    .do((res) => console.log(res))
 }
 export function upsertWorkOrders(detailInfos: Array<WorkOrder[]>, db: DbOperationProvider): Observable<any> {
   const sqls = [];

@@ -25,6 +25,7 @@
     "@ionic-native/sqlite": "^4.2.1",
     "@ionic-native/status-bar": "3.12.1",
     "@ionic/storage": "2.0.1",
+    "angular-tree-component": "^5.0.0",
     "cordova-android": "^6.2.3",
     "cordova-plugin-console": "^1.0.7",
     "cordova-plugin-device": "^1.1.6",
@@ -43,7 +44,6 @@
     "reselect": "^3.0.1",
     "rxjs": "5.4.0",
     "sw-toolbox": "3.6.0",
-    "tree-component": "^3.3.0",
     "util": "^0.10.3",
     "zone.js": "0.8.12"
   },

@@ -1,3 +1,3 @@
 <!-- Generated template for the DeviceTreeComponent component -->
-<tree [data]='deviceTreeData' [size]='"large"'  (toggle)="toggle($event)" (change)="onDeviceNodeChange($event)">
-</tree>
+<tree-root #tree [nodes]='deviceTreeData' [focused]='true' (activate)='onActivate($event)' [options]='options'>
+</tree-root>

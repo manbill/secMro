@@ -123,7 +123,7 @@ export class MyApp implements OnInit, OnDestroy {
             this.unsubscribe = this.store.subscribe(() => {
               if (shouldLogin(this.store.getState()) || !this.store.getState().userState.tokenState.isTokenValid) {
                 this.nav.setRoot(LoginPage);
-                // this.unsubscribe();
+                this.unsubscribe();
               }
             });
             this.store.dispatch(initUserState(userState));
@@ -131,7 +131,7 @@ export class MyApp implements OnInit, OnDestroy {
               if (!MroUtils.isNotEmpty(this.store.getState().userState.projectState.selectedProject)) {
                 this.nav.push(SelectCompanyProjectPage);
               } else {
-                this.nav.push(TabsPage);
+                this.nav.setRoot(TabsPage);;
               }
             }
           },

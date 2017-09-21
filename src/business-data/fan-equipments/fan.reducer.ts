@@ -1,10 +1,11 @@
 import { LOAD_MORE_FAULT_ORDER_DATA } from './../work-orders/fault-order/fault-order.actions';
-import { AppState } from './../../app/app.reducer';
 import { FanMachine, FanMachineEquipmentDetails, DeviceTree } from './fan.modal';
-import { fetchMachinesEpic, selectMachineEpic, getMachineFanDetailsEpic, loadMoreMachinesEpic, manualRefreshMachineListEpic } from './fan.epics';
+import { fetchMachinesEpic, selectMachineEpic, getMachineFanDetailsEpic, loadMoreMachinesEpic, refreshMachineListEpic } from './fan.epics';
 import { combineEpics } from 'redux-observable';
 import { Action } from 'redux';
 import * as FanMachineActions from "./fan.actions";
+import { createSelector } from "reselect";
+import { AppState } from '../../app/app.reducer';
 export interface FanMachineState {
   hasMoreData?: boolean;
   ids: number[];
@@ -42,8 +43,7 @@ export function FanMachineReducer(state: FanMachineState = initState, action: Ac
         selectedFanMachineEquipmentDetails: fanDetail
       }
     }
-    case FanMachineActions.AUTO_REFRESH_FAN_MACHINE_LIST:
-    case FanMachineActions.MANUAL_REFRESH_FAN_MACHINE_LIST: {
+    case FanMachineActions.REFRESH_FAN_MACHINE_LIST: {
       return {
         ...state,
         ...initState,
@@ -87,9 +87,13 @@ export function FanMachineReducer(state: FanMachineState = initState, action: Ac
         hasMoreData: machines.length !== 0
       }
     }
-    case FanMachineActions.MANUAL_REFRESH_FAN_MACHINE_LIST_COMPLETED:
-    case FanMachineActions.FETCH_FAN_MACHINE_EQUIPMENTS_DATA_COMPLETED:
-    case FanMachineActions.AUTO_REFRESH_FAN_MACHINE_LIST_COMPLETED: {
+    case FanMachineActions.REFRESH_FAN_MACHINE_LIST_COMPLETED: {
+      return {
+        ...state,
+        refreshDataCompleted: true
+      }
+    }
+    case FanMachineActions.FETCH_FAN_MACHINE_EQUIPMENTS_DATA_COMPLETED: {
       const machines = (<FanMachineActions.FetchFanMachineDataCompletedAction>action).machines;
       return {
         ...state,
@@ -105,10 +109,17 @@ export function FanMachineReducer(state: FanMachineState = initState, action: Ac
 export function getSelectedFanDetail(state: AppState): FanMachineEquipmentDetails {
   return state.businessDataState.fanMachineState.selectedFanMachineEquipmentDetails;
 }
+export function getSelectedEquipmentDetail(state:AppState,equipmentId:number):FanMachine{
+  return getSelectedFanDetail(state).equipmentId2EquipmentDetails[equipmentId];
+}
 export function getSelectedMachine(state: AppState): FanMachine {
   return state.businessDataState.fanMachineState.entities[state.businessDataState.fanMachineState.selectedFanMachineId];
 }
-export function getMachines(state: AppState): FanMachine[] {
-  return state.businessDataState.fanMachineState.ids.map(id => state.businessDataState.fanMachineState.entities[id]);
+export function getMachineIds(state: AppState): number[] {
+  return state.businessDataState.fanMachineState.ids
 }
-export const RootFanMachineEpic = combineEpics(fetchMachinesEpic, manualRefreshMachineListEpic, selectMachineEpic, getMachineFanDetailsEpic, loadMoreMachinesEpic);
+export function getMachines(state: AppState): FanMachine[] {
+  return state.businessDataState.fanMachineState.ids.map(id => state.businessDataState.fanMachineState.entities[id])
+}
+
+export const RootFanMachineEpic = combineEpics(fetchMachinesEpic, refreshMachineListEpic, selectMachineEpic, getMachineFanDetailsEpic, loadMoreMachinesEpic);

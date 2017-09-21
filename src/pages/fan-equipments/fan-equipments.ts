@@ -42,7 +42,8 @@ export class FanEquipmentsPage {
   }
   ngOnInit() {
     this.store.dispatch(FanMachineActions.fetchFanMachineData());
-    this.store.dispatch(FanMachineActions.manualRefreshMachineList());
+    this.store.dispatch(FanMachineActions.refreshMachineList());
+    this.store.dispatch(FanMachineActions.loadMoreFanMachineData(this.searchParams));
   }
   ionViewDidLoad() {
     console.log('ionViewDidLoad FanEquipmentsPage');
@@ -58,10 +59,11 @@ export class FanEquipmentsPage {
       }
     });
     this.store.dispatch(FanMachineActions.fetchFanMachineData());
-    this.store.dispatch(FanMachineActions.manualRefreshMachineList());
+    this.store.dispatch(FanMachineActions.refreshMachineList());
     this.searchParams.machineId = null;
     this.searchParams.pageNumber = 1;
     this.searchParams.positionCode = null;
+    this.store.dispatch(FanMachineActions.loadMoreFanMachineData(this.searchParams));
   }
   loadMoreMachines(infiniteScroll: InfiniteScroll) {
     this.searchParams.pageNumber++;

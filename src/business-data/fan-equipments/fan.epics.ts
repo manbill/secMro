@@ -9,6 +9,7 @@ import { ActionsObservable } from 'redux-observable';
 import { Action, Store } from 'redux';
 import * as FanMachineActions from "./fan.actions";
 import { getUserSelectedProjectId } from '../../user/user.reducer';
+import { getMachineIds } from './fan.reducer';
 export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(FanMachineActions.FETCH_FAN_MACHINE_EQUIPMENTS_DATA)
     .switchMap((action) => {
@@ -63,7 +64,7 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
           }))
         .repeatWhen(() => repeat$.asObservable())
         .map(machineDetails => {
-          if (machineDetails.length > 0) {
+          if (machineDetails['length'] > 0) {
             setTimeout(() => repeat$.next(), 0);
           } else {
             setTimeout(() => repeat$.complete());
@@ -135,29 +136,29 @@ export const fetchMachinesEpic = (action$: ActionsObservable<Action>, store: Sto
       const serverTime = actionLastSyncTimeCurServerTime['curServerTime'];
       return deps.db.executeSql(`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [serverTime, 1, action['type']]);
     })
-    .switchMap(() => {
-      return deps.db.executeSql(`select * from ${tableNames.eam_sync_fan_machine_equipment} order by positionCode limit 0,${deps.pagination}`)
+    .switchMap(() => {//下载完数据，默认刷新上一次查看的数据
+      return deps.db.executeSql(`select * from ${tableNames.eam_sync_fan_machine_equipment} where id in(${getMachineIds(store.getState())}) order by positionCode`)
         .map(MroUtils.changeDbRecord2Array)
         .do((r) => console.log(`下载完成，从数据库中获取${deps.pagination}条数据`, r));
     })
-    .map((machines: FanMachine[] ) => FanMachineActions.fetchFanMachineDataCompleted(machines))
+    .map((machines: FanMachine[]) => FanMachineActions.fetchFanMachineDataCompleted(machines))
     .catch(e => {
       console.error(e);
       return Observable.throw(generateMroError(e));
     })
 }
-export const manualRefreshMachineListEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
-  return action$.ofType(FanMachineActions.MANUAL_REFRESH_FAN_MACHINE_LIST)
-    .switchMap(() => {
-      let where = ` order by positionCode limit 0,${deps.pagination}`;
-      return deps.db.executeSql(`select fanMachineJson from ${tableNames.eam_sync_fan_machine_equipment} ${where}`)
-        .map(res => {
-          const results = MroUtils.changeDbRecord2Array(res);
-          return results.map(r => JSON.parse(r['fanMachineJson']));
-        })
-    })
-    .do((res)=>console.log(res))
-    .map(res=>FanMachineActions.manualRefreshMachineDataCompleted(res));
+export const refreshMachineListEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
+  return action$.ofType(FanMachineActions.REFRESH_FAN_MACHINE_LIST)
+    // .switchMap(() => {
+    //   let where = ` order by positionCode limit 0,${deps.pagination}`;
+    //   return deps.db.executeSql(`select fanMachineJson from ${tableNames.eam_sync_fan_machine_equipment} ${where}`)
+    //     .map(res => {
+    //       const results = MroUtils.changeDbRecord2Array(res);
+    //       return results.map(r => JSON.parse(r['fanMachineJson']));
+    //     })
+    // })
+    // .do((res) => console.log(res))
+    .map(() => FanMachineActions.refreshMachineListCompleted());
 }
 export const getMachineFanDetailsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(FanMachineActions.GET_SELECTED_MACHINE_EQUIPMENT_DETAILS)
