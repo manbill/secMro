@@ -36,12 +36,14 @@ export class TabsPage implements OnInit, OnDestroy {
   fanEquipment = FanEquipmentsPage;
   projectName: string;
   companyName: string;
+  firtIn: true;
   constructor(private navCtrl: NavController, private sqlite: DbOperationProvider, @Inject(AppStore) private store: Store<AppState>) {
     console.log("TabsPage,constructor");
+    this.firtIn = true;
   }
   onTabsChanged(tab: Tab) {
-    // console.log(tab.index)
-    if (tab.index === 0) {
+    console.log("onTabsChanged", tab.index)
+    if (tab.index === 0 && !this.firtIn) {
       tab.goToRoot({
         keyboardClose: true
       })

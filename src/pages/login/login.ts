@@ -76,9 +76,16 @@ export class LoginPage {
     let isJumpPage = false;
     this.unsubscribe = this.store.subscribe(() => {
       if (getUserProjects(this.store.getState()).length !== 0 && this.store.getState().userState.tokenState.isTokenValid) {//如果登录成功且下载项目成功
-        console.log('登录且成功下载项目信息')
+        console.log('登录且成功下载项目信息');
+        this.unsubscribe();
         if (!isJumpPage) {
           isJumpPage = true;
+          if (getUserProjects(this.store.getState()).length === 1) {
+            this.store.dispatch(selectProject(getUserProjects(this.store.getState())[0]));
+            console.log('一个项目，直接跳转到首页');
+            this.navCtrl.setRoot(TabsPage);
+            return;
+          }
           console.log('跳转到选择项目界面', isJumpPage);
           this.navCtrl.push(SelectCompanyProjectPage);
         }

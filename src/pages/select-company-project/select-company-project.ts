@@ -76,7 +76,7 @@ export class SelectCompanyProjectPage {
     //选择完公司和项目后，跳转到首页，先判断是否是不同的项目，相同项目，直接跳转首页，否则清空业务数据，重新下载业务数据
     this.store.dispatch(selectCompany(this.selectProjectForm.get('company').value));
     this.store.dispatch(selectProject(this.selectProjectForm.get('project').value));
-    this.navCtrl.setRoot(TabsPage);
+    this.navCtrl.push(TabsPage);
   }
   ionViewDidLoad() {
     console.log('ionViewDidLoad SelectCompanyProjectPage');
