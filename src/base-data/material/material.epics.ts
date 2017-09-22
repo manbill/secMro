@@ -35,10 +35,9 @@ import { LOGIN_SUCCESS } from '../../user/user.actions';
 
 
 export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
-  let curServerTime = Date.now();
-  const pagination = deps.pagination;//物料列表，每次获取的数量
-  return action$.ofType(MaterialActions.FETCH_MATERIAL_DATA, LOGIN_SUCCESS)
+  return action$.ofType(MaterialActions.FETCH_MATERIAL_DATA)
     .switchMap(() => {
+      const pagination = deps.pagination;//物料列表，每次获取的数量
       return deps.db.executeSql(`select * from ${tableNames.eam_sync_actions} where syncAction=?`, [MaterialActions.FETCH_MATERIAL_DATA])
         .map(res => {
           const result = MroUtils.changeDbRecord2Array(res);
@@ -48,160 +47,135 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
             return 0;
           }
         })
-    })
-    .do(res => { console.log(res) })
-    // .map(time => 0)//用来测试下载物料的过程
-    .switchMap(lastSyncTime => {
-      const loading = deps.loading.create();
-      loading.setContent('获取服务器时间...');
-      loading.present();
-      return deps.http.get(deps.mroApis.getCurServerTimeApi).map((res: MroResponse) => res.data)
-        .finally(() => loading.dismiss())
-    }, (lastSyncTime, serverTime) => ({ lastSyncTime, serverTime }))
-    .switchMap(({ lastSyncTime, serverTime }) => {
-      const loading = deps.loading.create();
-      loading.setContent('正在下载物料...');
-      loading.present();
-      curServerTime = serverTime;
-      const params = {
-        startDate: lastSyncTime,
-        endDate: serverTime,
-        page: 1
-      }
-      const repeat$ = new Subject();
-      const bufferCount = 10;//批量操作,这里是1000的倍数，后台每次返回1000条物料
-      const maxRetryCount = 3;
-      const retryIntervalTime = 2000;//每2秒尝试重新获取物料信息
-      return Observable.empty().startWith('getMaterials')
-        .do(() => console.log('物料下载参数', params))
-        .switchMap(() => deps.http.post(deps.mroApis.fetchMaterialApi, params)
-          .retryWhen((err$) => Observable
-            .range(0, maxRetryCount)
-            .zip(err$, (i, err) => ({ i, err }))
-            .mergeMap(({ i, err }) => {
-              if (i === maxRetryCount - 1) {
-                return Observable.throw(err);
-              }
-              return Observable.timer(i * retryIntervalTime);
-            })
-          )
-        )
-        .repeatWhen((notifications) => {
-          return repeat$.asObservable()
-            .do(v => console.log("notifications", notifications),
-            e => console.error(e),
-            () => console.log('repeat complete'))
-        })
-        .map((res: MroResponse) => {
-          console.log(res.data)
-          if (res.data && res.data.length > 0) {
-            setTimeout(() => repeat$.next(), 0);
-            params.page++;
-          } else {
-            if (!res.data) {
-              repeat$.error(res.retInfo);
-            } else if (res.data.length === 0) {
-              setTimeout(() => {
-                repeat$.complete();
-              }, 0)
-            }
+        .do(res => { console.log(res) })
+        // .map(time => 0)//用来测试下载物料的过程
+        .switchMap(lastSyncTime => {
+          const loading = deps.loading.create();
+          loading.setContent('获取服务器时间...');
+          loading.present();
+          return deps.http.get(deps.mroApis.getCurServerTimeApi).map((res: MroResponse) => res.data)
+            .finally(() => loading.dismiss())
+        }, (lastSyncTime, serverTime) => ({ lastSyncTime, serverTime }))
+        .switchMap(({ lastSyncTime, serverTime }) => {
+          const loading = deps.loading.create();
+          loading.setContent('正在下载物料...');
+          loading.present();
+          const curServerTime = serverTime;
+          const params = {
+            startDate: lastSyncTime,
+            endDate: serverTime,
+            page: 1
           }
-          return res.data
-        })
-        .filter(values => values.length > 0)
-        .bufferCount(bufferCount)
-        .do(values => console.log(values))
-        .mergeMap((values) => {
-          const sqls = [];
-          const materials = values.reduce((arr, item) => arr.concat(item), []);
-          console.log('materials', materials.length);
-          sqls.push(`delete from  ${tableNames.eam_sync_material} where materialId in (${materials.map(m => m.materialId)})`);
-          const insertSql = `insert into ${tableNames.eam_sync_material}(
-            materialId,
-            materialName,
-            unit,
-            materialSno,
-            materialType,
-            materialTypeText,
-            materialSuite,
-            machine_model,
-            materialFileid,
-            materialValue,
-            marterialExpiredate,
-            materialComment,
-            materialSupplier,
-            materialFilePath,
-            qrcodeFileid,
-            materialQrFilePath,
-            material_replace,
-            comment,
-            materialVendor,
-            machineModel,
-            machineModelId,
-            materialReplace,
-            activeFlag,
-            sapInventoryFlag,
-            json
-          )values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
-          materials.forEach(material => {
-            const vals = [];
-            vals.push(material.materialId);
-            vals.push(material.materialName);
-            vals.push(material.unit);
-            vals.push(material.materialSno);
-            vals.push(material.materialType);
-            vals.push(material.materialTypeText);
-            vals.push(material.materialSuite);
-            vals.push(material.machine_model);
-            vals.push(material.materialFileid);
-            vals.push(material.materialValue);
-            vals.push(material.marterialExpiredate);
-            vals.push(material.materialComment);
-            vals.push(material.materialSupplier);
-            vals.push(material.materialFilePath);
-            vals.push(material.qrcodeFileid);
-            vals.push(material.materialQrFilePath);
-            vals.push(material.material_replace);
-            vals.push(material.comment);
-            vals.push(material.materialVendor);
-            vals.push(material.machineModel);
-            vals.push(material.machineModelId);
-            vals.push(material.materialReplace);
-            vals.push(material.activeFlag);
-            vals.push(material.sapInventoryFlag);
-            vals.push(JSON.stringify(material));
-            sqls.push([insertSql, vals]);
-          });
-          return deps.db.sqlBatch(sqls)
-            .do(() => {
-              console.log("完成一次物料批量更新数据库操作");
+          const repeat$ = new Subject();
+          const bufferCount = 10;//批量操作,这里是1000的倍数，后台每次返回1000条物料
+          const maxRetryCount = 3;
+          const retryIntervalTime = 2000;//每2秒尝试重新获取物料信息
+          return Observable.empty().startWith('getMaterials')
+            .do(() => console.log('物料下载参数', params))
+            .switchMap(() => deps.http.post(deps.mroApis.fetchMaterialApi, params)
+              .retryWhen((err$) => Observable
+                .range(0, maxRetryCount)
+                .zip(err$, (i, err) => ({ i, err }))
+                .mergeMap(({ i, err }) => {
+                  if (i === maxRetryCount - 1) {
+                    return Observable.throw(err);
+                  }
+                  return Observable.timer(i * retryIntervalTime);
+                })
+              )
+            )
+            .repeatWhen((notifications) => {
+              return repeat$.asObservable()
+                .do(v => console.log("notifications", notifications),
+                e => console.error(e),
+                () => console.log('repeat complete'))
             })
+            .map((res: MroResponse) => {
+              console.log(res.data)
+              if (res.data && res.data.length > 0) {
+                setTimeout(() => repeat$.next(), 0);
+                params.page++;
+              } else {
+                if (!res.data) {
+                  repeat$.error(res.retInfo);
+                } else if (res.data.length === 0) {
+                  setTimeout(() => {
+                    repeat$.complete();
+                  }, 0)
+                }
+              }
+              return res.data
+            })
+            .filter(values => values.length > 0)
+            .bufferCount(bufferCount)
+            .do(values => console.log(values))
+            .mergeMap((values) => {
+              const sqls = [];
+              const materials = values.reduce((arr, item) => arr.concat(item), []);
+              console.log('materials', materials.length);
+              sqls.push(`delete from  ${tableNames.eam_sync_material} where materialId in (${materials.map(m => m.materialId)})`);
+              const insertSql = `insert into ${tableNames.eam_sync_material}( materialId, materialName, unit, materialSno, materialType, materialTypeText, materialSuite, machine_model, materialFileid, materialValue, marterialExpiredate, materialComment, materialSupplier, materialFilePath, qrcodeFileid, materialQrFilePath, material_replace, comment, materialVendor, machineModel, machineModelId, materialReplace, activeFlag, sapInventoryFlag, json )values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+              materials.forEach(material => {
+                const vals = [];
+                vals.push(material.materialId);
+                vals.push(material.materialName);
+                vals.push(material.unit);
+                vals.push(material.materialSno);
+                vals.push(material.materialType);
+                vals.push(material.materialTypeText);
+                vals.push(material.materialSuite);
+                vals.push(material.machine_model);
+                vals.push(material.materialFileid);
+                vals.push(material.materialValue);
+                vals.push(material.marterialExpiredate);
+                vals.push(material.materialComment);
+                vals.push(material.materialSupplier);
+                vals.push(material.materialFilePath);
+                vals.push(material.qrcodeFileid);
+                vals.push(material.materialQrFilePath);
+                vals.push(material.material_replace);
+                vals.push(material.comment);
+                vals.push(material.materialVendor);
+                vals.push(material.machineModel);
+                vals.push(material.machineModelId);
+                vals.push(material.materialReplace);
+                vals.push(material.activeFlag);
+                vals.push(material.sapInventoryFlag);
+                vals.push(JSON.stringify(material));
+                sqls.push([insertSql, vals]);
+              });
+              return deps.db.sqlBatch(sqls)
+                .do(() => {
+                  console.log("完成一次物料批量更新数据库操作");
+                })
+            })
+            .takeLast(1)
+            .finally(() => loading.dismiss())
+            .catch(e => {
+              console.error(e);
+              return Observable.throw(e);
+            });
+        }, lastTimeServerTime => lastTimeServerTime)
+        .do(() => console.log("完成所有物料缓存操作"))
+        .switchMap((lastTimeServerTime) => {
+          const materialState: MaterialState = {
+            ids: [],
+            isCompleted: true,
+            materialEntities: {}
+          }
+          const sqls = [[`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [lastTimeServerTime.serverTime, 1, MaterialActions.FETCH_MATERIAL_DATA]]];
+          sqls.push([`update ${tableNames.eam_sync_base_data_state} set stateJson=? where type=?`, [JSON.stringify(materialState), BaseDataStateTypes.materialStatetype.type]])
+          return deps.db.sqlBatch(sqls);
         })
-        .takeLast(1)
-        .finally(() => loading.dismiss())
-        .catch(e => {
+        .mapTo(MaterialActions.fetchMaterialDataCompleted())
+        .mapTo(MaterialActions.loadMoreMaterials({ pageNumber: 1 }))
+        .catch((e: MroError) => {
           console.error(e);
-          return Observable.throw(e);
-        });
+          let err = new MroError(MroErrorCode.fetch_material_error_code, '获取物料信息失败,<br/>' + e.errorMessage, JSON.stringify(e));
+          return Observable.of(generateMroError(err));
+        })
     })
-    .do(() => console.log("完成所有物料缓存操作"))
-    .switchMap(() => {
-      const materialState: MaterialState = {
-        ids: [],
-        isCompleted: true,
-        materialEntities: {}
-      }
-      const sqls = [[`update ${tableNames.eam_sync_actions} set lastSyncSuccessTime=?,syncStatus=? where syncAction=?`, [curServerTime, 1, MaterialActions.FETCH_MATERIAL_DATA]]];
-      sqls.push([`update ${tableNames.eam_sync_base_data_state} set stateJson=? where type=?`, [JSON.stringify(materialState), BaseDataStateTypes.materialStatetype.type]])
-      return deps.db.sqlBatch(sqls);
-    })
-    .mapTo(MaterialActions.fetchMaterialDataCompleted())
-    .mapTo(MaterialActions.loadMoreMaterials({ pageNumber: 1 }))
-    .catch((e: MroError) => {
-      console.error(e);
-      let err = new MroError(MroErrorCode.fetch_material_error_code, '获取物料信息失败,<br/>' + e.errorMessage, JSON.stringify(e));
-      return Observable.of(generateMroError(err));
-    })
+
 }
 export const doRefreshMaterialDataEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(MaterialActions.DO_REFRESH_MATERIALS)

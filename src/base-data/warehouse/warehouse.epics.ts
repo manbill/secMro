@@ -14,14 +14,13 @@ import { WarehouseState } from './warehouse.reducer';
 import { BaseDataStateTypes } from '../base-data.actions';
 import { LOGIN_SUCCESS } from '../../user/user.actions';
 export const fetchWarehouseEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
-  return action$.ofType(FETCH_WAREHOUSE_DATA,LOGIN_SUCCESS)
+  return action$.ofType(FETCH_WAREHOUSE_DATA)
     .switchMap(() => {
       const loading = deps.loading.create({
         content: '获取仓库信息...'
       });
       loading.present();
       return deps.http.post(deps.mroApis.fetchWarehouse, {})
-        .do(() => loading.dismiss())
         .switchMap((res: MroResponse) => {
           const insertSql = `insert into ${tableNames.eam_sync_warehouse}(
             repertoryId,
@@ -100,10 +99,10 @@ export const fetchWarehouseEpic = (action$: ActionsObservable<Action>, store: St
         })
         .catch(e => {
           console.error(e);
-          loading.dismiss();
           let err = new MroError(MroErrorCode.fetch_warehouse_error_code, `获取仓库信息失败`, JSON.stringify(e))
-          return Observable.of(generateMroError(err));
+          return Observable.throw(generateMroError(err));
         })
+        .finally(()=>loading.dismiss());
     })
 }
 export const doRefreshWarehousesEpic=(action$:ActionsObservable<Action>,store:Store<AppState>,deps:EpicDependencies)=>{

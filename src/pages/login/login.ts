@@ -1,5 +1,4 @@
 import { Platform } from 'ionic-angular';
-import { MroUtils } from './../../common/mro-util';
 import { SelectCompanyProjectPage } from './../select-company-project/select-company-project';
 import { User } from './../../user/user.modal';
 import { TabsPage } from './../tabs/tabs';
@@ -21,6 +20,9 @@ import { Api_login } from '../../providers/api/api';
 import { Subject } from "rxjs/Subject";
 import { login } from "../../user/user.actions";
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { MroUtils } from '../../common/mro-util';
+import { getUserProjects, getCurrentUser } from '../../user/user.reducer';
+import { selectProject } from '../../project/project.actions';
 
 
 
@@ -38,7 +40,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 })
 export class LoginPage {
   loginForm: FormGroup;
-  unsubscription: Unsubscribe;
+  unsubscribe: Unsubscribe;
   constructor(private navCtrl: NavController,
     private fb: FormBuilder,
     private http: Http,
@@ -60,18 +62,8 @@ export class LoginPage {
         password: this.loginForm.get('password').value,
         deviceFlag: this.plt.is('ios') ? 1 : 2
       }
-    )
-    );
-    //登录用户改变，或者是尚未选择项目
-    if (this.store.getState().userState.currentUser &&
-      this.store.getState().userState.currentUser.id !== MroUtils.getLastLoginUserId()
-      || !this.store.getState().userState.projectState.selectedProject
-    ) {
-      console.log('重新选择项目')
-      this.navCtrl.push(SelectCompanyProjectPage);
-      return;
-    }
-    this.navCtrl.push(TabsPage);//跳转到首页
+    ));
+    // this.navCtrl.push(SelectCompanyProjectPage);
   }
   ionViewDidLoad() {
     console.log('ionViewDidLoad LoginPage');
@@ -80,10 +72,23 @@ export class LoginPage {
     console.log('ionViewDidLeave LoginPage');
 
   }
+  ngOnInit() {
+    let isJumpPage = false;
+    this.unsubscribe = this.store.subscribe(() => {
+      if (getUserProjects(this.store.getState()).length !== 0 && this.store.getState().userState.tokenState.isTokenValid) {//如果登录成功且下载项目成功
+        console.log('登录且成功下载项目信息')
+        if (!isJumpPage) {
+          isJumpPage = true;
+          console.log('跳转到选择项目界面', isJumpPage);
+          this.navCtrl.push(SelectCompanyProjectPage);
+        }
+      }
+    })
+  }
   ngOnDestroy() {
     //Called once, before the instance is destroyed.
     //Add 'implements OnDestroy' to the class.
     console.log('loginPage destroy')
-    this.unsubscription && this.unsubscription();
+    this.unsubscribe();
   }
 }

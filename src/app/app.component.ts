@@ -121,17 +121,20 @@ export class MyApp implements OnInit, OnDestroy {
           .subscribe(
           (userState) => {
             this.unsubscribe = this.store.subscribe(() => {
-              if (shouldLogin(this.store.getState()) || !this.store.getState().userState.tokenState.isTokenValid) {
+              if (!this.store.getState().userState.tokenState.isTokenValid) {//tonken失效，需要重新登录
                 this.nav.setRoot(LoginPage);
-                this.unsubscribe();
               }
             });
             this.store.dispatch(initUserState(userState));
-            if (this.store.getState().userState.tokenState.isTokenValid && !shouldLogin(this.store.getState())) {
-              if (!MroUtils.isNotEmpty(this.store.getState().userState.projectState.selectedProject)) {
-                this.nav.push(SelectCompanyProjectPage);
-              } else {
-                this.nav.setRoot(TabsPage);;
+            if (this.store.getState().userState.tokenState.isTokenValid) {
+              if(!shouldLogin(this.store.getState())){//如果不是每天首次使用，或者基础数据已经下载完成
+                if (!MroUtils.isNotEmpty(this.store.getState().userState.projectState.selectedProject)) {//尚未选择项目
+                  this.nav.push(SelectCompanyProjectPage);
+                } else {//选择过项目，直接跳转到首页
+                  this.nav.setRoot(TabsPage);
+                }
+              }else{//否则需要重新登录
+                this.nav.setRoot(LoginPage);
               }
             }
           },

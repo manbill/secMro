@@ -1,7 +1,6 @@
 import { not } from 'ramda';
 import { TokenState } from './user.reducer';
 import { Project } from './../project/project.modal';
-import { AppState } from './../app/app.reducer';
 import { RootCompanyEpics } from './../company/company.reducer';
 import { User } from './user.modal';
 import { combineReducers, Action } from 'redux';
@@ -11,6 +10,7 @@ import * as UserActions from "./user.actions";
 import { combineEpics } from "redux-observable";
 import { loginEpic, setUserStateEpic } from './user.epics';
 import * as moment from "moment/moment";
+import { AppState } from '../app/app.reducer';
 export interface UserState {
   projectState: ProjectState;
   companyState: CompanyState;
@@ -106,4 +106,10 @@ export function getUserSelectedProjectId(state: AppState): number {
 };
 export function getUserSelectedProject(state: AppState): Project {
   return state.userState.projectState.selectedProject
+}
+export function getUserProjects(state:AppState):Project[]{
+  return state.userState.projectState.ids.map(id=>state.userState.projectState.projectEntities[id]);
+}
+export function getCurrentUser(state:AppState):User{
+  return state.userState.currentUser;
 }

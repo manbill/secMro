@@ -29,17 +29,17 @@ export const loginEpic = (action$: ActionsObservable<Action>, store: Store<AppSt
       loading.present();
       return deps.http.post(deps.mroApis.loginApi, (<UserActions.LoginAction>action).userInfo)
         .finally(() => loading.dismiss())
+        .do(res => console.log(res))
+        .map((res: MroResponse) => {
+          return loginSuccess(res.data)
+        })
+        .do(res => console.log(res))
+        .catch((e: Error) => {
+          console.error(e);
+          const err = new MroError(MroErrorCode.user_login_error_code, `登录失败`, JSON.stringify(e));
+          return Observable.throw(generateMroError(err));
+        });
     })
-    .do(res => console.log(res))
-    .map((res: MroResponse) => {
-      return loginSuccess(res.data)
-    })
-    .do(res => console.log(res))
-    .catch((e: Error) => {
-      console.error(e);
-      const err = new MroError(MroErrorCode.user_login_error_code, `登录失败`, JSON.stringify(e));
-      return Observable.throw(generateMroError(err));
-    });
 }
 export const setUserStateEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(SELECT_PROJECT, LOGIN_SUCCESS)
