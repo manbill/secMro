@@ -24,14 +24,18 @@ export class HomePage implements OnInit {
     private sqlite: DbOperationProvider,
     private navParams: NavParams) {
     this.unsubscribe = store.subscribe(() => {
-      this.companyName = store.getState().userState.companyState.selectedCompany.companyName;
-      this.projectName = store.getState().userState.projectState.selectedProject.projectName;
+      this.updateCompanyAndProjectName();
     });
+    this.updateCompanyAndProjectName();
   }
   ngOnInit() {
     // this.store.dispatch({ type: 'home' });//这个action主要是为了获取用户所选择的公司和项目的名称
     // // this.faultOrders();
     // console.log('home,onInit');
+  }
+  updateCompanyAndProjectName() {
+    this.companyName = this.store.getState().userState.companyState.selectedCompany.companyName;
+    this.projectName = this.store.getState().userState.projectState.selectedProject.projectName;
   }
   ionViewDidEnter() {
     console.log('home,ionViewDidEnter');
