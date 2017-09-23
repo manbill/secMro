@@ -1,4 +1,4 @@
-import { MroError ,generateMroError,MroErrorCode} from './../app/mro-error-handler';
+import { MroError ,MroErrorCode} from './../app/mro-error';
 import { Observable } from 'rxjs/Observable';
 import { MroUtils } from './../common/mro-util';
 import { ActionsObservable } from 'redux-observable';
@@ -12,6 +12,7 @@ import 'rxjs/add/operator/do';
 import 'rxjs/add/observable/of';
 import { MroResponse } from '../common/mro-response';
 import { SELECT_COMPANY } from '../company/company.actions';
+import { generateMroError } from '../app/app.actions';
 
 export const fetchProjectsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => action$.ofType(LOGIN_SUCCESS)
 .switchMap(()=>{

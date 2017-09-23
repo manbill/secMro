@@ -8,7 +8,7 @@ import { MroAppStoreProvider } from './app.store';
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule } from 'ionic-angular';
-import { MroErrorHandler,MroErrorHandlerProvider } from "./mro-error-handler";
+import { MroErrorHandler,MroErrorHandlerProvider } from "./mro-error";
 import { MyApp } from './app.component';
 import { AboutPage } from '../pages/about/about';
 import { HomePage } from '../pages/home/home';

@@ -4,7 +4,7 @@ import { BusinessDataSyncActions, BusinessWorkOrderDataSyncActionsEntities } fro
 import { SELECT_PROJECT } from './../../project/project.actions';
 import { WorkOrder, ApiWorkorderBaseInfoDto } from './work-order.modal';
 import { Subject } from 'rxjs/Subject';
-import { MroError, generateMroError } from './../../app/mro-error-handler';
+import { MroError } from './../../app/mro-error';
 import { MroUtils } from './../../common/mro-util';
 import { AppState, EpicDependencies } from './../../app/app.reducer';
 import { tableNames } from './../../providers/db-operation/mro.tables';
@@ -16,6 +16,7 @@ import { fetchWorkOrderDataCompleted } from './work-order.actions';
 import { FETCH_FAULT_ORDER_DATA } from './fault-order/fault-order.actions';
 import { MroResponse } from '../../common/mro-response';
 import 'rxjs/add/operator/concatMap';
+import { generateMroError } from '../../app/app.actions';
 
 export const fetchWorkOrderEpics = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(...Object.keys(BusinessWorkOrderDataSyncActionsEntities))

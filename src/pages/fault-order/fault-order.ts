@@ -68,6 +68,11 @@ export class FaultOrderPage {
     console.log('ionViewDidLoad FaultOrderPage', this.searchForm.value);
   }
   ionViewDidLeave() {
+
+  }
+  ngOnDestroy() {
+    //Called once, before the instance is destroyed.
+    //Add 'implements OnDestroy' to the class.
     this.faultOrdersUnsbuscribe();
     this.refreshUnsubscribe && this.refreshUnsubscribe();
     this.loadMoreUnsubscribe && this.loadMoreUnsubscribe();

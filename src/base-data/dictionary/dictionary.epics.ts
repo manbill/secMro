@@ -1,7 +1,8 @@
+import { CANCEL_ANY_HTTP_REQUEST } from './../../app/app.actions';
 import { MroUtils } from './../../common/mro-util';
 import { Dictionary } from './dictionary.modal';
 import { Observable } from 'rxjs/Observable';
-import { MroError, MroErrorCode, generateMroError } from './../../app/mro-error-handler';
+import { MroError, MroErrorCode } from './../../app/mro-error';
 import { MroResponse } from './../../common/mro-response';
 import { tableNames } from './../../providers/db-operation/mro.tables';
 import * as DictonaryActions from './dictionary.actions';
@@ -18,6 +19,7 @@ import { DictionaryState } from './dictionary.reducer';
 import { BaseDataStateTypes } from '../base-data.actions';
 import { LOGIN_SUCCESS } from '../../user/user.actions';
 import { Loading } from 'ionic-angular';
+import { generateMroError } from '../../app/app.actions';
 export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(DictonaryActions.FETCH_DICTIONARY_DATA)
     .switchMap(() => {
@@ -37,12 +39,14 @@ export const fetDictionaryDataEpic = (action$: ActionsObservable<Action>, store:
         .switchMap(lastTime => {
           return deps.http.get(deps.mroApis.getCurServerTimeApi)
             .map(res => res['data'])
+            .takeUntil(action$.ofType(CANCEL_ANY_HTTP_REQUEST))
         }, (lastTime, serverTime) => ({ lastTime, serverTime }))
         .switchMap(({ lastTime, serverTime }) => {
           return deps.http.post(deps.mroApis.fetchDictionaryApi, {
             startDate: lastTime,
             endDate: serverTime
-          });
+          })
+          .takeUntil(action$.ofType(CANCEL_ANY_HTTP_REQUEST))
         }, (lastTimeAndServerTime, res: MroResponse) => ({ lastTimeAndServerTime, res: res.data }))
         .switchMap(({ lastTimeAndServerTime, res }) => {
           return deps.db.executeSql(`select * from ${tableNames.eam_sync_dictionary_detail}`)

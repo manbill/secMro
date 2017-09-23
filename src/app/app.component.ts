@@ -15,7 +15,7 @@ import { Store, Unsubscribe } from 'redux';
 import { AppStore } from './app.store';
 import { DbOperationProvider } from './../providers/db-operation/db-operation';
 import { Component, Inject, ViewChild, ErrorHandler, OnInit, OnDestroy } from '@angular/core';
-import { Platform, NavController, LoadingController } from 'ionic-angular';
+import { Platform, NavController, LoadingController, AlertController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import 'rxjs/add/operator/timestamp';
@@ -24,10 +24,11 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/of';
 import { LoginPage } from '../pages/login/login';
-import { MroErrorCode, MroError } from "./mro-error-handler";
+import { MroErrorCode, MroError } from "./mro-error";
 import { initUserState } from "../user/user.actions";
 import { BusinessDataSyncActions } from '../business-data/business.actions';
-
+import { getHttpState, getMroErrorMessages } from "./app.reducer";
+import { handlingErrors } from './app.actions';
 @Component({
   templateUrl: 'app.html'
 })
@@ -35,7 +36,7 @@ export class MyApp implements OnInit, OnDestroy {
   rootPage: any;
   @ViewChild('nav') nav: NavController;
   unsubscribe: Unsubscribe;
-  constructor(private platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private loadingCtrl: LoadingController, private errorHandler: ErrorHandler, private dbOp: DbOperationProvider, @Inject(AppStore) private store: Store<AppState>) {
+  constructor(private platform: Platform, private statusBar: StatusBar, private alertCtr: AlertController, private splashScreen: SplashScreen, private loadingCtrl: LoadingController, private errorHandler: ErrorHandler, private dbOp: DbOperationProvider, @Inject(AppStore) private store: Store<AppState>) {
 
   }
   ngOnDestroy() {
@@ -121,19 +122,31 @@ export class MyApp implements OnInit, OnDestroy {
           .subscribe(
           (userState) => {
             this.unsubscribe = this.store.subscribe(() => {
-              if (!this.store.getState().userState.tokenState.isTokenValid) {//tonken失效，需要重新登录
-                this.nav.setRoot(LoginPage);
+              const httpState = getHttpState(this.store.getState());
+              const httpIsRunning = httpState.actions.length > 0 && httpState.actions.map(action => httpState.entities[action].httpIsRunning).every(isRunning => isRunning);
+              console.log('httpIsRunning', httpIsRunning);
+              if (!this.store.getState().userState.tokenState.isTokenValid || (!httpIsRunning && shouldLogin(this.store.getState()))) {//tonken失效，需要重新登录
+                if (!httpIsRunning) {//如果用户点击了登录，发送了一个action，发现tokenId还是失效的，但是如果此时正在请求网络，就不要再回到首页，而是等待网络请求结束
+                  console.log('this.nav.setRoot(LoginPage)');
+                  this.nav.setRoot(LoginPage);
+                }
+                const errors = getMroErrorMessages(this.store.getState());
+                if (!httpIsRunning && errors.length > 0) {
+                  console.error('处理错误！！！');
+                  this.errorHandler.handleError(errors);
+
+                }
               }
             });
             this.store.dispatch(initUserState(userState));
             if (this.store.getState().userState.tokenState.isTokenValid) {
-              if(!shouldLogin(this.store.getState())){//如果不是每天首次使用，或者基础数据已经下载完成
+              if (!shouldLogin(this.store.getState())) {//如果不是每天首次使用，或者基础数据已经下载完成
                 if (!MroUtils.isNotEmpty(this.store.getState().userState.projectState.selectedProject)) {//尚未选择项目
                   this.nav.push(SelectCompanyProjectPage);
                 } else {//选择过项目，直接跳转到首页
                   this.nav.setRoot(TabsPage);
                 }
-              }else{//否则需要重新登录
+              } else {//否则需要重新登录
                 this.nav.setRoot(LoginPage);
               }
             }

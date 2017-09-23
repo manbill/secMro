@@ -4,7 +4,7 @@ import { AppStore } from './../../app/app.store';
 import { Store, Unsubscribe } from 'redux';
 import { AppState } from './../../app/app.reducer';
 import { Material } from './../../base-data/material/material.modal';
-import { Component, OnInit, OnDestroy, Inject, ViewChild,NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, ViewChild, NgZone } from '@angular/core';
 import { NavController, InfiniteScroll, Refresher, List, Content } from 'ionic-angular';
 import { getMaterials, doRefreshMaterials, loadMoreMaterials } from '../../base-data/material/material.actions';
 
@@ -27,7 +27,7 @@ export class InventoriesPage implements OnInit, OnDestroy {
   }
   ngOnDestroy(): void {
     this.unsubscribe();
-    this.scrollSubscribe();
+    this.scrollSubscribe && this.scrollSubscribe();
   }
   ngOnInit(): void {
     this.unsubscribe = this.store.subscribe(() => {
@@ -54,7 +54,7 @@ export class InventoriesPage implements OnInit, OnDestroy {
       };
       if (!this.store.getState().baseDataState.materialState.hasMoreData) {
         infiniteScroll.enable(false);
-      }else{
+      } else {
         infiniteScroll.enable(true);
       }
     });

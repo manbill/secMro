@@ -1,18 +1,18 @@
 import { DictionaryState } from './dictionary/dictionary.reducer';
 import { MaterialState } from './material/material.reducer';
-import { FETCH_DICTIONARY_DATA,INIT_DICTIONARY_STATE } from './dictionary/dictionary.actions';
-import { FETCH_MATERIAL_DATA ,INIT_MATERIAL_STATE} from './material/material.actions';
+import * as DictActions from './dictionary/dictionary.actions';
+import * as MaterialActions from './material/material.actions';
 import { Action } from 'redux';
 import { WarehouseState } from './warehouse/warehouse.reducer';
-import { INIT_WAREHOUSE_STATE, FETCH_WAREHOUSE_DATA } from './warehouse/warehouse.actions';
-import { FETCH_MANUAL_INSTRUCTOR_DATA, INIT_MANUAL_INSTRUCTORS } from './manual-instructor/instructor.actions';
+import * as WarehouseActions from './warehouse/warehouse.actions';
+import * as InstructorActions from './manual-instructor/instructor.actions';
 import { ManualInstructorState } from './manual-instructor/instructor.reducer';
 export const BASE_DATA_SYNC_COMPLETED = 'base_data_sync_completed';
 export const BaseDataSyncActions = [
-  FETCH_DICTIONARY_DATA,
-  FETCH_MATERIAL_DATA,
-  FETCH_WAREHOUSE_DATA,
-  FETCH_MANUAL_INSTRUCTOR_DATA
+  DictActions.FETCH_DICTIONARY_DATA,
+  MaterialActions.FETCH_MATERIAL_DATA,
+  WarehouseActions.FETCH_WAREHOUSE_DATA,
+  InstructorActions.FETCH_MANUAL_INSTRUCTOR_DATA
 ]
 export function baseDataSyncComplete(): Action {
   return {
@@ -21,7 +21,7 @@ export function baseDataSyncComplete(): Action {
 }
 export const BaseDataStateTypes:IBaseDataStateTypes={
   manualStateType:{
-    initActionName:INIT_MANUAL_INSTRUCTORS,
+    initActionName:InstructorActions.INIT_MANUAL_INSTRUCTORS,
     type:'base_manual_instructors_state',
     state:{
       ids:[],
@@ -30,8 +30,8 @@ export const BaseDataStateTypes:IBaseDataStateTypes={
     }
   },
   dictionaryStateType:{
-    type:'base_materials_state',
-    initActionName:INIT_DICTIONARY_STATE,
+    type:'base_dictionary_state',
+    initActionName:DictActions.INIT_DICTIONARY_STATE,
     state:{
       detailIds:[],
       dictionaryEntities:{},
@@ -39,8 +39,8 @@ export const BaseDataStateTypes:IBaseDataStateTypes={
     }
   },
   materialStatetype:{
-    type:'base_dictionary_state',
-    initActionName:INIT_MATERIAL_STATE,
+    type:'base_materials_state',
+    initActionName:MaterialActions. INIT_MATERIAL_STATE,
     state:{
       ids:[],
       isCompleted:false,
@@ -49,7 +49,7 @@ export const BaseDataStateTypes:IBaseDataStateTypes={
   },
   warehouseStateType:{
     type:'base_warehouse_state',
-    initActionName:INIT_WAREHOUSE_STATE,
+    initActionName:WarehouseActions.INIT_WAREHOUSE_STATE,
     state:{
       isCompleted:false,
       ids:[],

@@ -1,3 +1,4 @@
+import { CANCEL_ANY_HTTP_REQUEST } from './../../app/app.actions';
 import { ActionsObservable } from 'redux-observable';
 import { Action, Store } from 'redux';
 import { AppState, EpicDependencies } from '../../app/app.reducer';
@@ -9,7 +10,7 @@ import { MroUtils } from '../../common/mro-util';
 import { MroResponse } from '../../common/mro-response';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
-import { MroError, MroErrorCode, generateMroError } from '../../app/mro-error-handler';
+import { MroError, MroErrorCode } from './../../app/mro-error';
 import { ManualInstructor } from './instructor.modal';
 import * as R from "ramda";
 import { not } from 'ramda';
@@ -17,6 +18,7 @@ import { ManualInstructorState } from './instructor.reducer';
 import { BaseDataStateTypes } from '../base-data.actions';
 import { SELECT_COMPANY } from '../../company/company.actions';
 import 'rxjs/add/operator/pluck';
+import { generateMroError } from '../../app/app.actions';
 
 export const fetchManualInstructorsEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(FETCH_MANUAL_INSTRUCTOR_DATA)
@@ -33,6 +35,7 @@ export const fetchManualInstructorsEpic = (action$: ActionsObservable<Action>, s
         .switchMap(lastSyncSuccessTime => {
           return deps.http.get(deps.mroApis.getCurServerTimeApi)
             .map((res: MroResponse) => res.data)
+            .takeUntil(action$.ofType(CANCEL_ANY_HTTP_REQUEST))
         }, (last_update_time, now_server_date) => ({ last_update_time, now_server_date }))
         .switchMap(({ last_update_time, now_server_date }) => {
           const repeat$ = new Subject();
@@ -58,10 +61,11 @@ export const fetchManualInstructorsEpic = (action$: ActionsObservable<Action>, s
                     }, 0);
                   }
                   return res.data['dataObject'];
-                });
+                })
+                .takeUntil(action$.ofType(CANCEL_ANY_HTTP_REQUEST))
             })
             .filter(r => !R.isNil(r['manualInfoDTO']))
-            .repeatWhen(() => repeat$.asObservable())
+            .repeatWhen(() => repeat$.asObservable().takeUntil(action$.ofType(CANCEL_ANY_HTTP_REQUEST)))
             .retryWhen(err$ => Observable.range(0, maxRetryCount)
               .zip(err$, (i, err) => ({ i, err }))
               .mergeMap(({ i, err }) => {

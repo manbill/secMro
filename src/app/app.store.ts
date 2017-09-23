@@ -1,4 +1,4 @@
-import { MroError, MroErrorCode } from './mro-error-handler';
+import { MroError, MroErrorCode } from './mro-error';
 import { Observable } from 'rxjs/Observable';
 import { HttpInterceptorService } from 'ng-http-interceptor';
 import { InjectionToken, Provider, ErrorHandler } from '@angular/core';
@@ -11,18 +11,17 @@ import { LoadingController, AlertController } from 'ionic-angular';
 import { MroApiProvider } from '../providers/mro-api/mro-api';
 import { MroUtils } from '../common/mro-util';
 import { tokenInvalid } from "../user/user.actions";
-
+import { cancelHttpRequest,generateMroError } from "./app.actions";
 const composeEnhancer = window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
 export const AppStore = new InjectionToken("Mro.App.Store");
-export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loading: LoadingController, api: MroApiProvider, interceptor: HttpInterceptorService, alterCtrl: AlertController, errorHandler: ErrorHandler) {
+export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loading: LoadingController, api: MroApiProvider, interceptor: HttpInterceptorService, alterCtrl: AlertController) {
   const deps: EpicDependencies = {
     db: sqlite,
     http: http,
     loading: loading,
     mroApis: api.mroApiEntities,
     alterCtrl: alterCtrl,
-    errorHandler: errorHandler,
-    pagination: MroUtils.PAGINATION//列表每次展示的条目数量
+    pagination: MroUtils.PAGINATION//列表每次展示的条目数量;
   };
   const store: Store<AppState> = createStore(RootReducer, composeEnhancer(
     applyMiddleware(
@@ -62,11 +61,14 @@ export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loadi
           // errorHandler.handleError(err);
           if (store.getState().userState.tokenState.isTokenValid) {
             store.dispatch(tokenInvalid());
+            store.dispatch(generateMroError(err));
           }
           throw (err);
         }
         if (r.json().retCode !== '00000') {
-          let err = new MroError(MroErrorCode.token_invalid_error_code, 'token失效，请重新登录', r.json().retInfo || "网络请求失败!");
+          store.dispatch(cancelHttpRequest());
+          let err = new MroError(MroErrorCode.network_error_code, '网络请求失败', r.json().retInfo || "网络请求失败!");
+          store.dispatch(generateMroError(err));
           throw (err);
         }
         return r.json();
@@ -77,6 +79,6 @@ export function createMroAppStore(http: Http, sqlite: DbOperationProvider, loadi
 }
 export const MroAppStoreProvider: Provider = {
   provide: AppStore,
-  useFactory: (http, sqlite, loading, api, interceptor, alterCtrl, errorHandler) => createMroAppStore(http, sqlite, loading, api, interceptor, alterCtrl, errorHandler),
-  deps: [Http, DbOperationProvider, LoadingController, MroApiProvider, HttpInterceptorService, AlertController, ErrorHandler]
+  useFactory: (http, sqlite, loading, api, interceptor, alterCtrl, errorHandler) => createMroAppStore(http, sqlite, loading, api, interceptor, alterCtrl),
+  deps: [Http, DbOperationProvider, LoadingController, MroApiProvider, HttpInterceptorService, AlertController]
 }

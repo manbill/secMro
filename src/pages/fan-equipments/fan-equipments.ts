@@ -53,6 +53,8 @@ export class FanEquipmentsPage {
     this.navCtrl.push(DeviceTreePage);
   }
   refreshMachineList(refresher: Refresher) {
+    console.log('refreshMachineList');
+    setTimeout(()=>refresher.complete(),1000);
     this.refreshUnsubscribe = this.store.subscribe(() => {
       if (this.store.getState().businessDataState.fanMachineState.refreshDataCompleted) {
         refresher.complete();

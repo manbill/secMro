@@ -1,49 +1,42 @@
+import { AppState } from './app.reducer';
 import { LoginPage } from './../pages/login/login';
 import { Action } from 'redux';
-import { ActionCreator } from 'redux';
-import { IonicErrorHandler, LoadingController, App, Loading } from 'ionic-angular';
-import { Inject,Provider,ErrorHandler ,Injectable} from "@angular/core";
+import { ActionCreator, Store } from 'redux';
+import { IonicErrorHandler, LoadingController, App, Loading, AlertController } from 'ionic-angular';
+import { Inject, Provider, ErrorHandler, Injectable, Injector } from "@angular/core";
 import { inspect } from "util";
-export const GENERATE_MRO_ERROR='generate_mro_error';
-export const HANDLED_ERROR="handled_error";
+import { AppStore } from './app.store';
+import { errorsHandledCompleted } from "./app.actions";
 export class MroErrorHandler extends IonicErrorHandler {
-  constructor(@Inject(LoadingController)private loadingCtrl: LoadingController) { super() }
-  handleError(error: any) {
-    console.error(error);
-    let loading:Loading;
-    if(!loading){
-      loading= this.loadingCtrl.create({
-        content:error.errorMessage,
-        duration:500,
-        spinner: 'hide',
-        enableBackdropDismiss:true,
-        cssClass:'error'
+  store: Store<AppState>;
+  constructor(@Inject(Injector)private injector: Injector, @Inject(LoadingController) private loadingCtrl: LoadingController, @Inject(AlertController) private alert: AlertController) {
+    super();
+    this.store = injector.get<Store<AppState>>(AppStore);
+  }
+  handleError(errors: MroError[]) {
+    console.error(errors);
+    if (errors.length > 0) {
+      const errorAlert = this.alert.create({
+        title: '错误提示',
+        subTitle: '错误信息',
+        message: `${errors.map(err => err.errorMessage + "<br/>")}`,
+        buttons: [{
+          text: '确定',
+          handler: () => {
+            this.store.dispatch(errorsHandledCompleted());
+            console.log('错误处理,完成');
+          }
+        }, {
+          text: '取消',
+          role: 'cancel',
+          handler: () => {
+            console.log('错误处理取消');
+            this.store.dispatch(errorsHandledCompleted());
+          }
+        }
+        ]
       });
-      loading.setShowBackdrop(true);
-      loading.setDuration(60*1000);
-      loading.present();
-    }
-
-    if (this.isMroError(error)) {
-      switch (error.errorCode) {
-        case MroErrorCode.network_error_code: {
-          // alert("网络错误,原因：" + error.errorMessage);
-          loading.setContent(error.errorMessage);
-          break;
-        }
-        case MroErrorCode.token_invalid_error_code:{
-          loading.setDuration(1000*3);
-          loading.setContent(error.errorMessage);
-          return;
-        }
-      }
-    } else {
-      loading.setContent('异常错误:<br/>' + inspect(error, { depth: 3 }));
-      // this.loading.create({
-      //   content: '异常错误:<br/>' + inspect(error, { depth: 3 }),
-      //   duration: 1000,
-      //   enableBackdropDismiss: true
-      // }).present();
+      errorAlert.present();
     }
   }
   isMroError(mroError: any): mroError is MroError {
@@ -52,14 +45,14 @@ export class MroErrorHandler extends IonicErrorHandler {
   }
 }
 export class MroError {
-  constructor(errorCode:number,errorMessage:string,errorReason?:any){
+  constructor(errorCode: number, errorMessage: string, errorReason?: any) {
     this.errorCode = errorCode;
     this.errorMessage = errorMessage;
     this.errorReason = errorReason;
   }
   errorCode: number;
   errorMessage: string;
-  errorReason:any;
+  errorReason: any;
 }
 export enum MroErrorCode {
   network_error_code = 0x00001,//网络错误
@@ -89,19 +82,5 @@ export enum MroErrorCode {
   fetch_warehouse_error_code,
   generate_mro_error_code
 }
-export function errorHandled():Action{
-  return {
-    type:HANDLED_ERROR
-  }
-}
-export interface GenerateMroErrorAction extends Action{
-  error:MroError
-}
-export function generateMroError(e:MroError):GenerateMroErrorAction{
-  return {
-    type:GENERATE_MRO_ERROR,
-    error:e
-  }
-}
-export const MroErrorHandlerProvider:Provider=
+export const MroErrorHandlerProvider: Provider =
   { provide: ErrorHandler, useClass: MroErrorHandler }

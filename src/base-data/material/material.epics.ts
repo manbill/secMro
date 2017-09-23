@@ -1,3 +1,4 @@
+import { CANCEL_ANY_HTTP_REQUEST } from './../../app/app.actions';
 import { Subject } from 'rxjs/Subject';
 import { tableNames } from './../../providers/db-operation/mro.tables';
 import { ActionsObservable, combineEpics } from 'redux-observable';
@@ -8,7 +9,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
-import { generateMroError, MroError, MroErrorCode } from '../../app/mro-error-handler';
+import { MroError, MroErrorCode } from './../../app/mro-error';
 import { MroUtils } from '../../common/mro-util';
 import { MroResponse } from '../../common/mro-response';
 import 'rxjs/add/operator/repeatWhen';
@@ -25,12 +26,14 @@ import 'rxjs/add/operator/startWith';
 import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/finally';
 import 'rxjs/add/operator/takeLast';
+import 'rxjs/add/observable/race';
 import * as R from "ramda";
 import { Loading } from 'ionic-angular';
 import { loadMoreMaterialsComplete, loadMoreMaterials } from './material.actions';
 import { MaterialState } from './material.reducer';
 import { BaseDataStateTypes } from '../base-data.actions';
 import { LOGIN_SUCCESS } from '../../user/user.actions';
+import { generateMroError } from '../../app/app.actions';
 
 
 
@@ -53,7 +56,9 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
           const loading = deps.loading.create();
           loading.setContent('获取服务器时间...');
           loading.present();
-          return deps.http.get(deps.mroApis.getCurServerTimeApi).map((res: MroResponse) => res.data)
+          return deps.http.get(deps.mroApis.getCurServerTimeApi)
+            .map((res: MroResponse) => res.data)
+            .takeUntil(action$.ofType(CANCEL_ANY_HTTP_REQUEST))
             .finally(() => loading.dismiss())
         }, (lastSyncTime, serverTime) => ({ lastSyncTime, serverTime }))
         .switchMap(({ lastSyncTime, serverTime }) => {
@@ -73,6 +78,7 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
           return Observable.empty().startWith('getMaterials')
             .do(() => console.log('物料下载参数', params))
             .switchMap(() => deps.http.post(deps.mroApis.fetchMaterialApi, params)
+              .takeUntil(action$.ofType(CANCEL_ANY_HTTP_REQUEST))
               .retryWhen((err$) => Observable
                 .range(0, maxRetryCount)
                 .zip(err$, (i, err) => ({ i, err }))
@@ -86,6 +92,7 @@ export const fetchMaterialsEpic = (action$: ActionsObservable<Action>, store: St
             )
             .repeatWhen((notifications) => {
               return repeat$.asObservable()
+                .takeUntil(action$.ofType(CANCEL_ANY_HTTP_REQUEST))
                 .do(v => console.log("notifications", notifications),
                 e => console.error(e),
                 () => console.log('repeat complete'))

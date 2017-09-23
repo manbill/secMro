@@ -1,5 +1,6 @@
+import { CANCEL_ANY_HTTP_REQUEST } from './../../app/app.actions';
 import { SELECT_PROJECT } from './../../project/project.actions';
-import { MroError, MroErrorCode, generateMroError } from '../../app/mro-error-handler';
+import { MroError, MroErrorCode } from './../../app/mro-error';
 import { Observable } from 'rxjs/Observable';
 import { MroResponse } from './../../common/mro-response';
 import { AppState, EpicDependencies } from './../../app/app.reducer';
@@ -13,6 +14,7 @@ import { tableNames } from "../../providers/db-operation/mro.tables";
 import { WarehouseState } from './warehouse.reducer';
 import { BaseDataStateTypes } from '../base-data.actions';
 import { LOGIN_SUCCESS } from '../../user/user.actions';
+import { generateMroError } from '../../app/app.actions';
 export const fetchWarehouseEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(FETCH_WAREHOUSE_DATA)
     .switchMap(() => {
@@ -21,6 +23,7 @@ export const fetchWarehouseEpic = (action$: ActionsObservable<Action>, store: St
       });
       loading.present();
       return deps.http.post(deps.mroApis.fetchWarehouse, {})
+      .takeUntil(action$.ofType(CANCEL_ANY_HTTP_REQUEST))
         .switchMap((res: MroResponse) => {
           const insertSql = `insert into ${tableNames.eam_sync_warehouse}(
             repertoryId,

@@ -14,11 +14,12 @@ import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/finally';
 import { Observable } from 'rxjs/Observable';
-import { MroError, MroErrorCode, generateMroError } from '../app/mro-error-handler';
+import { MroError, MroErrorCode } from './../app/mro-error';
 import { loginSuccess, LOGIN_SUCCESS } from './user.actions';
 import { User } from './user.modal';
 import { MroUtils } from '../common/mro-util';
 import { MroResponse } from '../common/mro-response';
+import { generateMroError } from '../app/app.actions';
 export const loginEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
   return action$.ofType(UserActions.LOGIN_ACTION)
     .switchMap(action => {
@@ -28,8 +29,6 @@ export const loginEpic = (action$: ActionsObservable<Action>, store: Store<AppSt
       });
       loading.present();
       return deps.http.post(deps.mroApis.loginApi, (<UserActions.LoginAction>action).userInfo)
-        .finally(() => loading.dismiss())
-        .do(res => console.log(res))
         .map((res: MroResponse) => {
           return loginSuccess(res.data)
         })
@@ -38,7 +37,8 @@ export const loginEpic = (action$: ActionsObservable<Action>, store: Store<AppSt
           console.error(e);
           const err = new MroError(MroErrorCode.user_login_error_code, `登录失败`, JSON.stringify(e));
           return Observable.throw(generateMroError(err));
-        });
+        })
+        .finally(() => loading.dismiss())
     })
 }
 export const setUserStateEpic = (action$: ActionsObservable<Action>, store: Store<AppState>, deps: EpicDependencies) => {
